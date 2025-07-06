@@ -7,8 +7,8 @@ DEFAULT_REPO_NAME = "Repository Showcase"
 DEFAULT_REPO_DESCRIPTION = "Code and files from a Git repository."
 DEFAULT_REPO_URL = "#" # Placeholder, should be provided
 DEFAULT_LOCAL_REPO_PATH = "." # Default source of files
-DEFAULT_INDEX_TEMPLATE_PATH = "index.html"
-DEFAULT_OUTPUT_HTML_PATH = "generated_index.html"
+DEFAULT_INDEX_TEMPLATE_PATH = "index.html" # This is now our new template
+DEFAULT_OUTPUT_HTML_PATH = "index.html" # Output directly to index.html
 
 # --- Helper Functions ---
 
@@ -68,30 +68,46 @@ def generate_file_list_html(files): # repo_path no longer needed here, path is f
 
     list_items_html = []
     for file_path in files:
-        link_id = html.escape(file_path.replace(os.sep, "-").replace(".", "_").replace(" ", "_"))
+        # Ensure section_id matches what's used in generate_file_content_sections_html
+        # The 'file-' prefix is added to ensure valid ID and avoid conflicts if a file is named e.g. '1'
+        section_id = "file-" + html.escape(file_path.replace(os.sep, "-").replace(".", "_").replace(" ", "_").replace("+", "_plus_").replace("#", "_hash_"))
+
+        # Add a class if it's a directory for specific styling
+        is_dir = file_path.endswith(os.sep)
+        link_class = ' class="dir-link"' if is_dir else ''
+
+        # For directories, the link might not point to a content section, or could point to a generated listing for that dir (future enhancement)
+        # For now, directories won't have a clickable href that shows content, but will be listed.
+        # The JS in the template expects href to start with # to trigger content display.
+        # We make directory links non-functional for content display for now, or they could link to '#'
+        href_attr = f'href="#{section_id}"' if not is_dir else 'href="#" onclick="event.preventDefault(); return false;"' # Make dir links non-interactive for content display
+
         list_items_html.append(
-            f'<li><a href="#{link_id}" data-filepath="{html.escape(file_path)}">{html.escape(file_path)}</a></li>'
+            f'<li><a {href_attr} data-filepath="{html.escape(file_path)}"{link_class}>{html.escape(file_path)}</a></li>'
         )
     return "\n".join(list_items_html)
 
 def generate_file_content_sections_html(files, repo_scan_path):
-    """Generates HTML sections for each file's content."""
+    """Generates HTML sections for each file's content, fitting the new template."""
     content_sections_html = []
     for file_path in files:
         if file_path.endswith(os.sep): # Skip directories for content display
             continue
 
-        content = read_file_content(file_path, repo_scan_path) # Pass both relative and base path
+        content = read_file_content(file_path, repo_scan_path)
         escaped_content = html.escape(content)
 
-        section_id = html.escape(file_path.replace(os.sep, "-").replace(".", "_").replace(" ", "_"))
+        # Ensure section_id matches what's used in generate_file_list_html and JS
+        # The 'file-' prefix is added to ensure valid ID
+        section_id = "file-" + html.escape(file_path.replace(os.sep, "-").replace(".", "_").replace(" ", "_").replace("+", "_plus_").replace("#", "_hash_"))
 
         content_sections_html.append(f"""
-        <section class="file-content" id="{section_id}">
+        <section class="file-content-display" id="{section_id}" style="display: none;">
             <h3>{html.escape(file_path)}</h3>
             <pre><code>{escaped_content}</code></pre>
-        </section>
-        """)
+        </section>""")
+    if not content_sections_html:
+        return '<h2 class="welcome-message">No viewable files found in the repository.</h2>'
     return "\n".join(content_sections_html)
 
 def main():
@@ -138,17 +154,48 @@ def main():
     output_content = output_content.replace("{repo_link}", html.escape(args.repo_url))
     output_content = output_content.replace("<!-- File items will be dynamically inserted here by Python -->", file_list_html)
 
-    # This replacement assumes the exact structure of the placeholder section.
-    # It's safer to use a more unique placeholder string if the template is complex.
-    # For example, <!-- ALL_FILE_CONTENTS_GO_HERE -->
-    # For now, the existing replacement logic for the section is kept.
-    output_content = output_content.replace(
-        """<section class="file-content" id="file-content-section" style="display:none;">
+    # Replace the content of the file-content-wrapper div with the generated sections
+    # This is a more robust way than replacing a specific complex HTML block.
+    # We look for the specific div and replace its content.
+    # The placeholder comment inside is a good target.
+    placeholder_comment = "<!-- File content sections will be dynamically inserted here by Python -->"
+    wrapper_start_tag = '<div class="file-content-wrapper" id="file-content-wrapper">'
+
+    # Find the position of the wrapper div's content area
+    try:
+        start_index = output_content.index(wrapper_start_tag) + len(wrapper_start_tag)
+        # Find the end of this div. This is a bit naive; a proper parser would be better for complex HTML.
+        # For this template, it should work if the div is empty or contains only the placeholder comment.
+        end_index = output_content.index('</div>', start_index)
+
+        # Construct the new content for the wrapper
+        # If file_content_sections_html is empty (e.g. no files), it will insert the welcome message from that function.
+        # Otherwise, it inserts the file sections. The client-side JS will manage showing the initial welcome message
+        # if no file is selected by hash.
+
+        # The original template has a welcome message. The Python script will now embed all content sections
+        # and the JS will decide if the welcome message (if present and not replaced) or a content section is shown.
+        # So we just inject file_content_sections_html into the wrapper.
+        # If file_content_sections_html itself contains a welcome message (e.g., "No viewable files"), that will be shown.
+        # Otherwise, the JS will show the template's default welcome message if no file is auto-selected.
+
+        output_content = output_content[:start_index] + "\n" + file_content_sections_html + "\n" + output_content[end_index:]
+
+    except ValueError:
+        print("Error: Could not find the file-content-wrapper div or placeholder comment in the template.")
+        # Fallback or error handling if the specific div structure isn't found.
+        # For now, we'll try the old replacement method as a very basic fallback, though it's unlikely to match.
+        old_placeholder_section = """<section class="file-content" id="file-content-section" style="display:none;">
             <h3><span id="current-file-path"></span></h3>
             <pre><code id="code-display"></code></pre>
-        </section>""",
-        file_content_sections_html
-    )
+        </section>"""
+        if old_placeholder_section in output_content:
+             output_content = output_content.replace(old_placeholder_section, file_content_sections_html)
+        else:
+            # If the new placeholder isn't there and the old one isn't either, there's a template mismatch.
+            print("Critical Error: Template structure significantly changed. Cannot inject file content.")
+            return
+
 
     # Check if the content to be written is different from the existing file
     # to minimize unnecessary rewrites (as per original user request).
