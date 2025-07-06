@@ -3,10 +3,1872 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Repository Viewer</title>
+    <title>Repository Showcase - Code Showcase</title>
     <style>
+        :root {
+            --primary-color: #2c3e50; /* Dark Slate Blue */
+            --secondary-color: #8e44ad; /* Royal Purple */
+            --accent-color: #f1c40f; /* Sunflower Yellow/Gold */
+            --background-color: #ecf0f1; /* Light Greyish Blue */
+            --text-color: #34495e; /* Wet Asphalt (Dark Grey) */
+            --light-text-color: #ffffff;
+            --border-color: #bdc3c7; /* Silver */
+            --code-bg-color: #282c34; /* Dark background for code */
+            --code-text-color: #abb2bf; /* Light grey for code text */
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1600px; /* Allow wider content */
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.2em;
+            font-weight: 300;
+        }
+
+        header h1 a {
+            color: var(--light-text-color);
+            text-decoration: none;
+        }
+         header h1 a:hover {
+            color: var(--accent-color);
+        }
+
+        header p {
+            font-size: 1.1em;
+            margin-bottom: 0.5em;
+            color: var(--border-color); /* Lighter text for description */
+        }
+
+        header .repo-link-header {
+            font-size: 0.9em;
+        }
+
+        header .repo-link-header a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        header .repo-link-header a:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar {
+            width: 25%;
+            min-width: 280px; /* Min width for file list */
+            background-color: #ffffff;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto; /* Scroll if file list is long */
+            box-shadow: 1px 0 3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar h2 {
+            font-size: 1.6em;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-weight: 500;
+        }
+
+        .file-list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .file-list li {
+            margin-bottom: 8px;
+        }
+
+        .file-list a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            padding: 8px 12px;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .file-list a:hover, .file-list a.active {
+            background-color: var(--secondary-color);
+            color: var(--light-text-color);
+        }
+
+        .file-list a.dir-link { /* Style for directory links */
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        .file-list a.dir-link:hover {
+             background-color: var(--primary-color);
+        }
+
+
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 30px;
+            overflow-y: auto; /* Scroll for long content */
+        }
+
+        .main-content h2.welcome-message {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .file-content-wrapper {
+            /* This div will be replaced by Python script */
+        }
+
+        .file-content-display { /* Class for individual file content sections */
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            margin-bottom: 25px; /* Space between content blocks if multiple are shown */
+        }
+
+        .file-content-display h3 {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 12px 20px;
+            margin: 0;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+            font-size: 1.3em;
+            font-weight: 500;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .file-content-display pre {
+            background-color: var(--code-bg-color);
+            color: var(--code-text-color);
+            padding: 20px;
+            margin: 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: var(--border-color); /* Lighter text for footer */
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) { /* Medium devices (tablets, less than 992px) */
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 40vh; /* Limit height of sidebar on small screens */
+            }
+            .main-content {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 768px) { /* Small devices (landscape phones, less than 768px) */
+             header h1 {
+                font-size: 2em;
+            }
+            .sidebar h2 {
+                font-size: 1.4em;
+            }
+             .file-content-display h3 {
+                font-size: 1.15em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="#" target="_blank">Repository Showcase</a></h1>
+        <p>Code and files from a Git repository.</p>
+        <p class="repo-link-header">Repository Link: <a href="#" target="_blank">#</a></p>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h2>File Explorer</h2>
+            <nav class="file-list">
+                <ul id="file-list-ul">
+                    <li><a href="#file-Age_Priorities_list_cpp" data-filepath="Age Priorities list.cpp">Age Priorities list.cpp</a></li>
+<li><a href="#file-Assignment_2" data-filepath="Assignment 2">Assignment 2</a></li>
+<li><a href="#file-Level_Wise_printing_of_nodes_of_Tree_cpp" data-filepath="Level Wise printing of nodes of Tree.cpp">Level Wise printing of nodes of Tree.cpp</a></li>
+<li><a href="#file-README_md" data-filepath="README.md">README.md</a></li>
+<li><a href="#file-Simple_Queue_cpp" data-filepath="Simple Queue.cpp">Simple Queue.cpp</a></li>
+<li><a href="#file-Song_Playlist_cpp" data-filepath="Song Playlist.cpp">Song Playlist.cpp</a></li>
+<li><a href="#file-Tree_In_Order_Traversing_cpp" data-filepath="Tree In Order Traversing.cpp">Tree In Order Traversing.cpp</a></li>
+<li><a href="#file-Tree_Post_Order_Traversing_cpp" data-filepath="Tree Post Order Traversing.cpp">Tree Post Order Traversing.cpp</a></li>
+<li><a href="#file-Tree_Pre_Order_Traversing_cpp" data-filepath="Tree Pre Order Traversing.cpp">Tree Pre Order Traversing.cpp</a></li>
+<li><a href="#file-Tree_cpp" data-filepath="Tree.cpp">Tree.cpp</a></li>
+<li><a href="#file-Website_history_forward_and_backward_in_linked_list_cpp" data-filepath="Website history forward and backward in linked list.cpp">Website history forward and backward in linked list.cpp</a></li>
+<li><a href="#file-generate_html_py" data-filepath="generate_html.py">generate_html.py</a></li>
+<li><a href="#file-generated_index_html" data-filepath="generated_index.html">generated_index.html</a></li>
+<li><a href="#file-index_html" data-filepath="index.html">index.html</a></li>
+<li><a href="#file-linkedlist_py" data-filepath="linkedlist.py">linkedlist.py</a></li>
+<li><a href="#file-update_checker_py" data-filepath="update_checker.py">update_checker.py</a></li>
+<li><a href="#file-write_a_cpp_program_that_prints_only_the_leaf_nodes_in_a_tree_cpp" data-filepath="write a cpp program that prints only the leaf nodes in a tree.cpp">write a cpp program that prints only the leaf nodes in a tree.cpp</a></li>
+                    <!-- Example: <li><a href="#path/to/file.py" data-filepath="path/to/file.py">path/to/file.py</a></li> -->
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- This div will contain all file content sections generated by Python -->
+            <div class="file-content-wrapper" id="file-content-wrapper">
+
+        <section class="file-content-display" id="file-Age_Priorities_list_cpp" style="display: none;">
+            <h3>Age Priorities list.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+struct Queue {
+    string name;
+    int age;
+    char gender;
+};
+
+struct Node {
+    Queue data;
+    Node* next;
+};
+
+class linkedlist {
+private:
+    Node* head;
+
+public:
+    linkedlist() {
+        head = NULL;
+    }
+
+    void insertQueue() {
+        Node* point = new Node();
+        cout &lt;&lt; &quot;\nEnter Name: &quot;;
+        cin &gt;&gt; point-&gt;data.name;
+        cout &lt;&lt; &quot;\nEnter Age: &quot;;
+        cin &gt;&gt; point-&gt;data.age;
+        cout &lt;&lt; &quot;\nEnter Gender (M/F): &quot;;
+        cin &gt;&gt; point-&gt;data.gender;
+        point-&gt;next = NULL;
+
+
+        if (head == NULL || point-&gt;data.age &gt; head-&gt;data.age) {
+            point-&gt;next = head;
+            head = point;
+        } else {
+            Node* temp = head;
+            while (temp-&gt;next != NULL &amp;&amp; temp-&gt;next-&gt;data.age &gt;= point-&gt;data.age) {
+                temp = temp-&gt;next;
+            }
+            point-&gt;next = temp-&gt;next;
+            temp-&gt;next = point;
+        }
+    }
+
+    void serveQueue() {
+        if (head == NULL) {
+            cout &lt;&lt; &quot;\nThe Queue is Empty!\n&quot;;
+            return;
+        }
+
+        cout &lt;&lt; &quot;Processing...... \n&quot; &lt;&lt; head-&gt;data.name &lt;&lt; &quot; has been served\n&quot;;
+        switch (head-&gt;data.gender) {
+            case &#x27;M&#x27;: case &#x27;m&#x27;:
+                cout &lt;&lt; &quot;Because he is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                break;
+            case &#x27;F&#x27;: case &#x27;f&#x27;:
+                cout &lt;&lt; &quot;Because she is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                break;
+            default:
+                cout &lt;&lt; &quot;Because (he/she) is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                break;
+        }
+
+        Node* temp = head;
+        head = head-&gt;next;
+        delete temp;
+    }
+
+    void displayQueue() {
+        if (head == NULL) {
+            cout &lt;&lt; &quot;\nThe Queue is Empty!\n&quot;;
+            return;
+        }
+
+        Node* temp = head;
+        int i = 1;
+        while (temp) {
+            cout &lt;&lt; &quot;\nPerson &quot; &lt;&lt; i &lt;&lt; &quot;:\n&quot;;
+            cout &lt;&lt; &quot;Name: &quot; &lt;&lt; temp-&gt;data.name &lt;&lt; &quot;\n&quot;;
+            cout &lt;&lt; &quot;Age: &quot; &lt;&lt; temp-&gt;data.age &lt;&lt; &quot;\n&quot;;
+            cout &lt;&lt; &quot;Gender: &quot; &lt;&lt; temp-&gt;data.gender &lt;&lt; &quot;\n&quot;;
+            temp = temp-&gt;next;
+            i++;
+        }
+    }
+};
+
+int main() {
+    linkedlist hospital;
+    int n;
+    menu:
+    cout &lt;&lt; &quot;\n1. Enter a person in the Queue.&quot;;
+    cout &lt;&lt; &quot;\n2. Serve a person.&quot;;
+    cout &lt;&lt; &quot;\n3. Show the list.&quot;;
+    cout &lt;&lt; &quot;\n4. Exit\n&quot;;
+    cout &lt;&lt; &quot;Enter choice: &quot;;
+    cin &gt;&gt; n;
+
+    switch (n) {
+        case 1:
+            hospital.insertQueue();
+            goto menu;
+        case 2:
+            hospital.serveQueue();
+            goto menu;
+        case 3:
+            hospital.displayQueue();
+            goto menu;
+        case 4:
+            return 0;
+        default:
+            cout &lt;&lt; &quot;\nInvalid choice! Try again.\n&quot;;
+            goto menu;
+    }
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Assignment_2" style="display: none;">
+            <h3>Assignment 2</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+struct transation {
+    int transaction_ID = 1;
+    string type;
+    int purchase;
+    transation* next;
+    transation* prv;
+};
+
+struct accounts {
+    int acc_id = 1;
+    string user_name;
+    accounts* next;
+    transation* head;
+    accounts* prv;
+};
+
+class tran {
+public:
+    void insertinlink(transation*&amp; head) {
+        char ck;
+        do {
+            int purchase;
+            string tp;
+
+            cout &lt;&lt; &quot;\nEnter Purchase: &quot;;
+            cin &gt;&gt; purchase;
+            cin.ignore();
+
+            cout &lt;&lt; &quot;\nEnter Note: &quot;;
+            getline(cin, tp);
+
+            transation* node = new transation();
+            node-&gt;purchase = purchase;
+            node-&gt;type = tp;
+
+            if (head) {
+                transation* temp = head;
+                while (temp-&gt;next) {
+                    temp = temp-&gt;next;
+                }
+                node-&gt;transaction_ID = temp-&gt;transaction_ID + 1;
+                temp-&gt;next = node;
+                node-&gt;prv = temp;
+            } else {
+                head = node;
+            }
+
+            node-&gt;next = NULL;
+
+            cout &lt;&lt; &quot;\nPress &#x27;Y&#x27; to enter another transaction: &quot;;
+            cin &gt;&gt; ck;
+        } while (ck == &#x27;Y&#x27; || ck == &#x27;y&#x27;);
+    }
+
+    void searchtran(transation* head) {
+        transation* temp = head;
+        while (temp) {
+            cout &lt;&lt; &quot;\nTransaction ID: &quot; &lt;&lt; temp-&gt;transaction_ID &lt;&lt; endl;
+            cout &lt;&lt; &quot;Purchase: &quot; &lt;&lt; temp-&gt;purchase &lt;&lt; endl;
+            cout &lt;&lt; &quot;Note: &quot; &lt;&lt; temp-&gt;type &lt;&lt; endl;
+            temp = temp-&gt;next;
+        }
+    }
+
+    void totaltransations(transation* head) {
+        transation* temp = head;
+        int sum = 0;
+        while (temp) {
+            sum += temp-&gt;purchase;
+            temp = temp-&gt;next;
+        }
+        cout &lt;&lt; &quot;\nThe Total amount you have spent is: &quot; &lt;&lt; sum &lt;&lt; &quot; Rs\n&quot;;
+    }
+
+    void display(transation* head) {
+        transation* temp = head;
+        while (temp) {
+            cout &lt;&lt; &quot;\nTransaction ID: &quot; &lt;&lt; temp-&gt;transaction_ID &lt;&lt; endl;
+            cout &lt;&lt; &quot;Purchase: &quot; &lt;&lt; temp-&gt;purchase &lt;&lt; endl;
+            cout &lt;&lt; &quot;Note: &quot; &lt;&lt; temp-&gt;type &lt;&lt; endl;
+            temp = temp-&gt;next;
+        }
+    }
+};
+
+class record {
+    accounts* acc_head;
+    int count = 0;
+
+public:
+    record() {
+        acc_head = NULL;
+    }
+
+    void newaccount() {
+        string name;
+        cout &lt;&lt; &quot;\nEnter Name: &quot;;
+        cin.ignore();
+        getline(cin, name);
+
+        accounts* acc = new accounts();
+        count++;
+
+        if (acc_head) {
+            accounts* temp = acc_head;
+            while (temp-&gt;next) {
+                temp = temp-&gt;next;
+            }
+            acc-&gt;acc_id = temp-&gt;acc_id + 1;
+            temp-&gt;next = acc;
+            acc-&gt;prv = temp;
+        } else {
+            acc_head = acc;
+            acc-&gt;prv = NULL;
+        }
+
+        cout &lt;&lt; &quot;\nYour Account ID is: &quot; &lt;&lt; acc-&gt;acc_id &lt;&lt; endl;
+        acc-&gt;user_name = name;
+        acc-&gt;next = NULL;
+        acc-&gt;head = NULL;
+
+        tran chain;
+        chain.insertinlink(acc-&gt;head);
+    }
+
+    void searchaccount() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &gt; 0) {
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Name: &quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Account ID: &quot;;
+            cin &gt;&gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&gt;user_name &amp;&amp; acid == temp-&gt;acc_id) {
+                    cout &lt;&lt; &quot;\n \t Transaction records\n\n&quot;;
+                    tran temp1;
+                    temp1.searchtran(temp-&gt;head);
+                    return;
+                }
+                temp = temp-&gt;next;
+            }
+
+            attempts--;
+            if (attempts &gt; 0) {
+                cout &lt;&lt; endl &lt;&lt; &quot;Invalid ID or Name! Attempts left: &quot; &lt;&lt; attempts &lt;&lt; endl;
+            } else {
+                cout &lt;&lt; endl &lt;&lt; &quot;Access limit reached! Returning to menu...&quot; &lt;&lt; endl;
+            }
+        }
+    }
+
+    void addtoaccount() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &gt; 0) {
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Name: &quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Account ID: &quot;;
+            cin &gt;&gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&gt;user_name &amp;&amp; acid == temp-&gt;acc_id) {
+                    tran temp1;
+                    temp1.insertinlink(temp-&gt;head);
+                    return;
+                }
+                temp = temp-&gt;next;
+            }
+
+            attempts--;
+            if (attempts &gt; 0) {
+                cout &lt;&lt; endl &lt;&lt; &quot;Invalid ID or Name! Attempts left: &quot; &lt;&lt; attempts &lt;&lt; endl;
+            } else {
+                cout &lt;&lt; endl &lt;&lt; &quot;Access limit reached! Returning to menu...&quot; &lt;&lt; endl;
+            }
+        }
+    }
+
+    int totalacc() {
+        return count;
+    }
+
+    void totalexpense() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &gt; 0) {
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Name: &quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &lt;&lt; endl &lt;&lt; &quot;Enter Account ID: &quot;;
+            cin &gt;&gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&gt;user_name &amp;&amp; acid == temp-&gt;acc_id) {
+                    tran temp1;
+                    temp1.totaltransations(temp-&gt;head);
+                    return;
+                }
+                temp = temp-&gt;next;
+            }
+
+            attempts--;
+            if (attempts &gt; 0) {
+                cout &lt;&lt; endl &lt;&lt; &quot;Invalid ID or Name! Attempts left: &quot; &lt;&lt; attempts &lt;&lt; endl;
+            } else {
+                cout &lt;&lt; endl &lt;&lt; &quot;Access limit reached! Returning to menu...&quot; &lt;&lt; endl;
+            }
+        }
+    }
+
+    void display() {
+        accounts* temp = acc_head;
+        while (temp) {
+            cout &lt;&lt; &quot;\nName: &quot; &lt;&lt; temp-&gt;user_name &lt;&lt; endl;
+            cout &lt;&lt; &quot;Account ID: &quot; &lt;&lt; temp-&gt;acc_id &lt;&lt; endl;
+            char ans;
+            cout &lt;&lt; &quot;\nPress &#x27;Y&#x27; if you want transaction details: &quot;;
+            cin &gt;&gt; ans;
+            if (ans == &#x27;y&#x27; || ans == &#x27;Y&#x27;) {
+                tran temp1;
+                temp1.display(temp-&gt;head);
+            }
+            temp = temp-&gt;next;
+        }
+    }
+};
+
+int main() {
+    int a, pass = 1234, p;
+    record m;
+
+    while (true) {
+        cout &lt;&lt; &quot;\t\tMenu\n&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;1. New Account.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;2. Search Account.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;3. Add Transaction to Existing Account.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;4. Display Number of Accounts.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;5. Total Transactions of an Account.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;6. Display All Accounts.&quot;;
+        cout &lt;&lt; endl &lt;&lt; &quot;7. Exit.&quot;;
+
+        cout &lt;&lt; endl &lt;&lt; &quot;\nEnter choice: &quot;;
+        cin &gt;&gt; a;
+
+        switch (a) {
+            case 1:
+				m.newaccount();
+				break;
+            case 2:
+				m.searchaccount();
+				break;
+            case 3:
+				m.addtoaccount();
+				break;
+            case 4:
+				cout &lt;&lt; &quot;\nTotal accounts are: &quot; &lt;&lt; m.totalacc() &lt;&lt; endl;
+				break;
+            case 5:
+				m.totalexpense();
+				break;
+            case 6:
+                cout &lt;&lt; &quot;Enter Password: &quot;;
+                cin &gt;&gt; p;
+                if (pass == p) m.display();
+                else cout &lt;&lt; &quot;\nInvalid password!\n&quot;;
+                break;
+            case 7:
+				return 0;
+            default: cout &lt;&lt; &quot;\nInvalid choice! Try again.\n&quot;;
+        }
+    }
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Level_Wise_printing_of_nodes_of_Tree_cpp" style="display: none;">
+            <h3>Level Wise printing of nodes of Tree.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+#include&lt;queue&gt;
+using namespace std;
+
+class node {
+public:
+    int data;
+    node* left;
+    node* right;
+    node(int d) {
+        data = d;
+        left = NULL;
+        right = NULL;
+    }
+};
+
+class tree {
+    int a[100]; // increased array size for more flexibility
+    int i = 0, c = 0;
+
+public:
+    node* insert(node* root, int val) {
+        if (root == NULL) {
+            return new node(val);
+        }
+        if (val &lt; root-&gt;data) {
+            root-&gt;left = insert(root-&gt;left, val);
+        } else {
+            root-&gt;right = insert(root-&gt;right, val);
+        }
+        return root;
+    }
+
+    void display_level(node* root) {
+        queue&lt;node*&gt; q;
+        int l = 0;
+        if (root == NULL) return;
+
+        q.push(root);
+        q.push(NULL);
+
+        while (!q.empty()) {
+            node* curr = q.front();
+            q.pop();
+            if (curr == NULL) {
+                if (!q.empty()) {
+                    cout &lt;&lt; endl;
+                    q.push(NULL);
+                    l++;
+                    continue;
+                } else {
+                    l++;
+                    break;
+                }
+            }
+            cout &lt;&lt; curr-&gt;data &lt;&lt; &quot; &quot;;
+            if (curr-&gt;left) q.push(curr-&gt;left);
+            if (curr-&gt;right) q.push(curr-&gt;right);
+        }
+        cout &lt;&lt; &quot;\n\nHeight of tree is: &quot; &lt;&lt; l &lt;&lt; endl;
+    }
+
+    void cout_leafs(node* root) {
+        if (root == NULL) return;
+        if (root-&gt;left == NULL &amp;&amp; root-&gt;right == NULL) {
+            a[i++] = root-&gt;data;
+            c++;
+        }
+        cout_leafs(root-&gt;left);
+        cout_leafs(root-&gt;right);
+    }
+
+    void display_leafs() {
+        cout &lt;&lt; &quot;\nTotal leaf nodes: &quot; &lt;&lt; c &lt;&lt; endl;
+        cout &lt;&lt; &quot;Leaf nodes: &quot;;
+        for (int j = 0; j &lt; i; j++) {
+            cout &lt;&lt; a[j] &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+        i = c = 0;
+    }
+
+    void count_parents(node* root) {
+        if (root == NULL) return;
+        if (root-&gt;left != NULL || root-&gt;right != NULL) {
+            a[i++] = root-&gt;data;
+            c++;
+        }
+        count_parents(root-&gt;left);
+        count_parents(root-&gt;right);
+    }
+
+    void display_parents() {
+        cout &lt;&lt; &quot;\nTotal parent nodes: &quot; &lt;&lt; c &lt;&lt; endl;
+        cout &lt;&lt; &quot;Parent nodes: &quot;;
+        for (int j = 0; j &lt; i; j++) {
+            cout &lt;&lt; a[j] &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+        i = c = 0;
+    }
+
+    void siblings(node* root) {
+        if (root == NULL) return;
+        if (root-&gt;left != NULL || root-&gt;right != NULL) {
+            cout &lt;&lt; &quot;\nParent: &quot; &lt;&lt; root-&gt;data &lt;&lt; &quot; =&gt; Children: &quot;;
+            if (root-&gt;left) cout &lt;&lt; root-&gt;left-&gt;data &lt;&lt; &quot; &quot;;
+            if (root-&gt;right) cout &lt;&lt; root-&gt;right-&gt;data &lt;&lt; &quot; &quot;;
+        }
+        siblings(root-&gt;left);
+        siblings(root-&gt;right);
+    }
+
+    void count_sub_trees(node* root) {
+        static int s = -1;
+        if (root == NULL) return;
+        if (s != -1) {
+            a[i++] = root-&gt;data;
+            c++;
+        }
+        s++;
+        count_sub_trees(root-&gt;left);
+        count_sub_trees(root-&gt;right);
+    }
+
+    void display_sub_trees() {
+        cout &lt;&lt; &quot;\nTotal subtrees (excluding root): &quot; &lt;&lt; c &lt;&lt; endl;
+        cout &lt;&lt; &quot;Subtree roots: &quot;;
+        for (int j = 0; j &lt; i; j++) {
+            cout &lt;&lt; a[j] &lt;&lt; &quot; &quot;;
+        }
+        cout &lt;&lt; endl;
+        i = c = 0;
+    }
+};
+
+int main() {
+    tree t;
+    node* root = NULL;
+    int n, val;
+
+    cout &lt;&lt; &quot;Enter number of nodes to insert in BST: &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter &quot; &lt;&lt; n &lt;&lt; &quot; integers:\n&quot;;
+    for (int i = 0; i &lt; n; i++) {
+        cin &gt;&gt; val;
+        root = t.insert(root, val);
+    }
+
+    cout &lt;&lt; &quot;\nLevel Order Traversal:\n&quot;;
+    t.display_level(root);
+
+    t.cout_leafs(root);
+    t.display_leafs();
+
+    t.count_parents(root);
+    t.display_parents();
+
+    t.siblings(root);
+
+    t.count_sub_trees(root);
+    t.display_sub_trees();
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-README_md" style="display: none;">
+            <h3>README.md</h3>
+            <pre><code># Data Structures and Algorithms Showcase
+
+## 1. Project Overview
+
+This repository serves as a collection of C++ and Python implementations of common data structures and algorithms. It is designed for educational purposes, providing clear examples of how these fundamental concepts are put into practice.
+
+A key feature of this project is an HTML generation script (`generate_html.py`). This script automatically creates a browsable web page (`generated_index.html`) that lists all code files in the repository and allows you to view their content directly in your browser, making it easy to explore the various examples.
+
+The main objectives are:
+*   To offer practical, understandable examples of data structures and algorithms.
+*   To provide a simple and convenient way to navigate and view the codebase.
+
+## 2. Installation Instructions
+
+To work with the examples in this repository, you&#x27;ll need the appropriate compilers/interpreters.
+
+### C++ Examples
+*   **Compiler:** A C++ compiler (like g++ or Clang) is required.
+*   **Compilation:** Navigate to the directory containing the C++ source file and compile it using a command similar to:
+    ```bash
+    g++ -o &lt;output_executable_name&gt; &lt;source_file_name&gt;.cpp
+    ```
+    For example, to compile `Simple Queue.cpp`:
+    ```bash
+    g++ -o simple_queue &quot;Simple Queue.cpp&quot;
+    ```
+    (Note: Files with spaces in their names, like `&quot;Simple Queue.cpp&quot;`, should be quoted in the terminal).
+
+### Python Examples
+*   **Interpreter:** Python 3 (version 3.6 or newer recommended) must be installed on your system.
+*   **Dependencies:** The Python scripts in this repository generally use standard libraries and do not require separate installation of external packages.
+
+### HTML Code Showcase Generation
+*   **Interpreter:** Python 3 is required to run the `generate_html.py` script.
+*   **Dependencies:** The script uses standard Python libraries (`os`, `html`, `argparse`) and does not require additional package installations.
+*   **Template:** The script uses `index.html` as a template for generating the output file `generated_index.html`.
+
+## 3. Usage Guidelines
+
+### Running C++ Examples
+1.  **Compile:** Follow the compilation instructions above.
+2.  **Execute:** Run the compiled executable from your terminal:
+    ```bash
+    ./&lt;output_executable_name&gt;
+    ```
+    For example:
+    ```bash
+    ./simple_queue
+    ```
+    Most C++ examples provide a command-line menu for interaction.
+
+### Running Python Examples
+1.  **Execute:** Run the Python scripts directly from your terminal:
+    ```bash
+    python &lt;script_name&gt;.py
+    ```
+    For example, to run the linked list example:
+    ```bash
+    python linkedlist.py
+    ```
+    The `linkedlist.py` script offers an interactive command-line menu.
+
+### Using the HTML Code Showcase
+1.  **Generate/Update:** To create or update the HTML showcase, run the `generate_html.py` script from the root of the repository:
+    ```bash
+    python generate_html.py
+    ```
+    This will process the files and create/overwrite `generated_index.html`.
+2.  **View:** Open the `generated_index.html` file in any modern web browser to explore the repository&#x27;s code. You can click on file names in the list to view their content.
+3.  **Custom Directory (Advanced):** The `generate_html.py` script can also target other directories. For usage details, you can run:
+    ```bash
+    python generate_html.py --help
+    ```
+
+### Expected Outcomes and Known Limitations
+*   **Standalone Examples:** Each C++ and Python example is generally self-contained and designed to demonstrate a specific concept. They do not typically interact with each other.
+*   **HTML Generator:**
+    *   The `generate_html.py` script is designed for text-based code files. It might not correctly display binary files or very large files.
+    *   It attempts to handle different character encodings but may encounter issues with highly unusual encodings.
+*   **File Naming:** Some C++ files have spaces in their names (e.g., `Age Priorities list.cpp`). This is generally not standard practice and might require careful handling (e.g., quoting file names) when compiling or managing them on the command line. Using quotes as shown in the compilation example is recommended.
+
+## 4. Contribution Guidelines
+
+We welcome contributions to enhance this collection of examples!
+
+### Reporting Issues
+*   If you find a bug, a typo, or have trouble with any part of the project, please clearly describe the issue. (If this were a GitHub project, you&#x27;d &quot;open an issue on the GitHub repository.&quot;) For now, consider documenting it if you fork the project.
+
+### Suggesting Features or New Examples
+*   If you have ideas for new data structure/algorithm examples or improvements to existing ones, these are welcome.
+*   Provide a clear description of the feature or example and its relevance.
+
+### Submitting Changes (e.g., Pull Requests)
+1.  **Fork &amp; Branch:** (Standard Git workflow) Fork the repository and create a new branch for your changes.
+2.  **Code:**
+    *   Ensure new code is well-commented and easy to understand.
+    *   If adding new C++ or Python examples, try to keep them self-contained.
+    *   Follow the general coding style of the existing examples or use common best practices for the respective language.
+3.  **Update HTML Showcase:** If you add, remove, or rename code files, **you must re-run the `generate_html.py` script** to ensure `generated_index.html` is up-to-date:
+    ```bash
+    python generate_html.py
+    ```
+    Include the updated `generated_index.html` in your changes.
+4.  **Commit Messages:** Write clear and concise commit messages, explaining the purpose of your changes.
+5.  **Submit:** (Standard Git workflow) Push your changes to your fork and submit a pull request to the main repository.
+
+---
+
+This README provides a guide to understanding, installing, using, and contributing to this project.
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Simple_Queue_cpp" style="display: none;">
+            <h3>Simple Queue.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+struct Queue {
+    string name;
+    int age;
+    char gender;
+};
+
+struct Node {
+    Queue data;
+    Node* next;
+};
+
+class linkedlist {
+private:
+    Node* head;
+    int front = -1;
+    int rare = -1;
+
+public:
+    linkedlist() {
+        head = NULL;
+    }
+
+    void insertQueue() {
+        rare++;
+        Node* point = new Node();
+        cout &lt;&lt; &quot;\nEnter Name:&quot;;
+        cin &gt;&gt; point-&gt;data.name;
+        cout &lt;&lt; &quot;\nEnter Age:&quot;;
+        cin &gt;&gt; point-&gt;data.age;
+        cout &lt;&lt; &quot;\nEnter Gender (M/F):&quot;;
+        cin &gt;&gt; point-&gt;data.gender;
+
+        point-&gt;next = NULL;
+
+        if (rare == 0) {
+            front = 0;
+        }
+
+        if (head == NULL) {
+            head = point;
+        } else {
+            Node* temp = head;
+            while (temp-&gt;next) {
+                temp = temp-&gt;next;
+            }
+            temp-&gt;next = point;
+        }
+    }
+
+    void serveQueue() {
+        if (front &gt;= 0) {
+            if (head == NULL) {
+                cout &lt;&lt; &quot;\nThe Queue is Empty!\n&quot;;
+                return;
+            }
+
+            cout &lt;&lt; &quot;Processing...... &quot; &lt;&lt; head-&gt;data.name &lt;&lt; &quot; has been served\n&quot;;
+
+            switch (head-&gt;data.gender) {
+                case &#x27;M&#x27;: case &#x27;m&#x27;:
+                    cout &lt;&lt; &quot;Because he is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                    break;
+                case &#x27;F&#x27;: case &#x27;f&#x27;:
+                    cout &lt;&lt; &quot;Because she is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                    break;
+                default:
+                    cout &lt;&lt; &quot;Because (he/she) is &quot; &lt;&lt; head-&gt;data.age &lt;&lt; &quot; years old\n&quot;;
+                    break;
+            }
+
+            Node* temp = head;
+            head = head-&gt;next;
+            delete temp;
+
+            rare--;
+            if (rare &lt; 0) front = -1;
+        } else {
+            cout &lt;&lt; &quot;\nThe Queue is Empty!\n&quot;;
+        }
+    }
+
+    void displayQueue() {
+        if (front &gt;= 0 &amp;&amp; head != NULL) {
+            Node* temp = head;
+            int i = 1;
+
+            while (temp) {
+                cout &lt;&lt; &quot;\nPerson &quot; &lt;&lt; i &lt;&lt; &quot;:\n&quot;;
+                cout &lt;&lt; &quot;Name: &quot; &lt;&lt; temp-&gt;data.name &lt;&lt; &quot;\n&quot;;
+                cout &lt;&lt; &quot;Age: &quot; &lt;&lt; temp-&gt;data.age &lt;&lt; &quot;\n&quot;;
+                cout &lt;&lt; &quot;Gender: &quot; &lt;&lt; temp-&gt;data.gender &lt;&lt; &quot;\n&quot;;
+                temp = temp-&gt;next;
+                i++;
+            }
+        } else {
+            cout &lt;&lt; &quot;\nThe Queue is Empty!\n&quot;;
+        }
+    }
+};
+
+int main() {
+    linkedlist hospital;
+    int n;
+    menu:
+    cout &lt;&lt; &quot;\n1. Enter a person in the Queue.&quot;;
+    cout &lt;&lt; &quot;\n2. Serve a person.&quot;;
+    cout &lt;&lt; &quot;\n3. Show the list.&quot;;
+    cout &lt;&lt; &quot;\n4. Exit\n&quot;;
+    cout &lt;&lt; &quot;Enter choice: &quot;;
+    cin &gt;&gt; n;
+
+    switch (n) {
+        case 1:
+            hospital.insertQueue();
+            goto menu;
+        case 2:
+            hospital.serveQueue();
+            goto menu;
+        case 3:
+            hospital.displayQueue();
+            goto menu;
+        case 4:
+            return 0;
+        default:
+            cout &lt;&lt; &quot;\nInvalid choice! Try again.\n&quot;;
+            goto menu;
+    }
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Song_Playlist_cpp" style="display: none;">
+            <h3>Song Playlist.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class Song{
+	public:
+		string name;
+		string title;
+		Song* prev;
+		Song* next;
+
+		Song(){
+			name=&quot;&quot;;
+			title=&quot;&quot;;
+			prev=NULL;
+			next=NULL;
+		}
+};
+class playlist{
+	Song* head;
+	Song* current;
+	int count=0;
+	public:
+		playlist(){
+			head=NULL;
+			current=NULL;
+		}
+		void addsong(){
+			Song* newsong=new Song();
+
+			cout&lt;&lt;&quot;Enter Song Name:&quot;;
+			cin&gt;&gt;newsong-&gt;name;
+			cout&lt;&lt;&quot;Enter Song Title:&quot;;
+			cin&gt;&gt;newsong-&gt;title;
+			if(head==NULL){
+				head=newsong;
+				newsong-&gt;next=NULL;
+				newsong-&gt;prev=NULL;
+				current=newsong;
+				count++;
+				return;
+			}else{
+				Song* temp=head;
+				while(temp-&gt;next){
+					temp=temp-&gt;next;
+				}
+				newsong-&gt;prev=temp;
+				temp-&gt;next=newsong;
+			}
+			current=newsong;
+			count++;
+		}
+
+		void playcurrentsong(){
+			if(count&lt;1){
+				cout&lt;&lt;&quot;\n No Song is currently in the list.\n&quot;;
+				return;
+			}
+			cout&lt;&lt;&quot;\nPlaying Song...........\n&quot;;
+			cout&lt;&lt;&quot;Name: &quot;&lt;&lt;current-&gt;name&lt;&lt;endl;
+			cout&lt;&lt;&quot;Title: &quot;&lt;&lt;current-&gt;title&lt;&lt;endl;
+
+		}
+		void nextsong(){
+			if(current-&gt;next==NULL){
+				cout&lt;&lt;&quot;\nThere is no Next Song\n&quot;;
+				return;
+			}
+			cout&lt;&lt;&quot;\nMoving to the next Song.\n&quot;;
+			current=current-&gt;next;
+
+		}
+		void prevsong(){
+			if(current-&gt;prev==NULL){
+				cout&lt;&lt;&quot;\nThere is no Previous Song\n&quot;;
+				return;
+			}
+			cout&lt;&lt;&quot;\nMoving to the previous Song.\n&quot;;
+			current=current-&gt;prev;
+		}
+};
+int main(){
+	playlist youtube;
+	int n;
+	menu:
+	cout&lt;&lt;&quot;\n----Menu----\n&quot;;
+	cout&lt;&lt;&quot;\n1. Add a Song&quot;;
+	cout&lt;&lt;&quot;\n2. Play Current Song&quot;;
+	cout&lt;&lt;&quot;\n3. Previous Song&quot;;
+	cout&lt;&lt;&quot;\n4. Next Song&quot;;
+	cout&lt;&lt;&quot;\n5. Exit App&quot;;
+
+	cout&lt;&lt;&quot;\nEnter your choice:&quot;;
+	cin&gt;&gt;n;
+
+	switch(n){
+		case 1:{
+			youtube.addsong();
+			goto menu;
+		}
+		case 2:{
+			youtube.playcurrentsong();
+			goto menu;
+		}
+		case 3:{
+			youtube.prevsong();
+			goto menu;
+		}
+		case 4:{
+			youtube.nextsong();
+			goto menu;
+		}
+		case 5:{
+			cout&lt;&lt;&quot;\nThe Application is Closing..............\n&quot;;
+			break;
+		}
+		default:{
+			cout&lt;&lt;&quot;\n Invalid Enter! Chose form the menu.\n&quot;;
+			goto menu;
+		}
+	}
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Tree_In_Order_Traversing_cpp" style="display: none;">
+            <h3>Tree In Order Traversing.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int val) : d(val), left(NULL), right(NULL) {}
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL){
+            return new node(v);
+        }
+        if (v &lt; r-&gt;d){
+            r-&gt;left = insert(r-&gt;left, v);
+        }
+        else if (v &gt; r-&gt;d){
+            r-&gt;right = insert(r-&gt;right, v);
+        }
+        return r;
+    }
+
+    void in_o(node* r) {
+        if (r == NULL) return;
+        in_o(r-&gt;left);
+        cout &lt;&lt; r-&gt;d &lt;&lt; &quot; &quot;;
+        in_o(r-&gt;right);
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &lt;&lt; &quot;How many values? &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter values:\n&quot;;
+    for (int i = 0; i &lt; n; ++i) {
+        cin &gt;&gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &lt;&lt; &quot;Inorder traversal: &quot;;
+    c.in_o(r);
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Tree_Post_Order_Traversing_cpp" style="display: none;">
+            <h3>Tree Post Order Traversing.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int val) : d(val), left(NULL), right(NULL) {}
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL){
+		return new node(v);
+		}
+        if (v &lt; r-&gt;d){
+		r-&gt;left = insert(r-&gt;left, v);
+		}
+        else if (v &gt; r-&gt;d){
+		r-&gt;right = insert(r-&gt;right, v);
+		}
+        return r;
+    }
+
+    void post_o(node* r) {
+        if (r == NULL) return;
+        post_o(r-&gt;left);
+        post_o(r-&gt;right);
+        cout &lt;&lt; r-&gt;d &lt;&lt; &quot; &quot;;
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &lt;&lt; &quot;How many values? &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter values:\n&quot;;
+    for (int i = 0; i &lt; n; ++i) {
+        cin &gt;&gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &lt;&lt; &quot;Postorder traversal: &quot;;
+    c.post_o(r);
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Tree_Pre_Order_Traversing_cpp" style="display: none;">
+            <h3>Tree Pre Order Traversing.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int val) : d(val), left(NULL), right(NULL) {}
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL){
+            return new node(v);
+        }
+        if (v &lt; r-&gt;d){
+            r-&gt;left = insert(r-&gt;left, v);
+        }
+        else if (v &gt; r-&gt;d){
+            r-&gt;right = insert(r-&gt;right, v);
+        }
+        return r;
+    }
+
+    void pre_o(node* r) {
+        if (r == NULL) return;
+        cout &lt;&lt; r-&gt;d &lt;&lt; &quot; &quot;;
+        pre_o(r-&gt;left);
+        pre_o(r-&gt;right);
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &lt;&lt; &quot;How many values? &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter values:\n&quot;;
+    for (int i = 0; i &lt; n; ++i) {
+        cin &gt;&gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &lt;&lt; &quot;Preorder traversal: &quot;;
+    c.pre_o(r);
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Tree_cpp" style="display: none;">
+            <h3>Tree.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int d) {
+        this-&gt;d = d;
+        left = right = NULL;
+    }
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL) {
+            return new node(v);
+        }
+        if (v &lt; r-&gt;d) {
+            r-&gt;left = insert(r-&gt;left, v);
+        } else if (v &gt; r-&gt;d) {
+            r-&gt;right = insert(r-&gt;right, v);
+        }
+        return r;
+    }
+
+    void pre_o(node* r) {
+        if (r == NULL) return;
+        cout &lt;&lt; r-&gt;d &lt;&lt; &quot; &quot;;
+        pre_o(r-&gt;left);
+        pre_o(r-&gt;right);
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &lt;&lt; &quot;How many values do you want to insert? &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter &quot; &lt;&lt; n &lt;&lt; &quot; integer values:\n&quot;;
+    for (int i = 0; i &lt; n; ++i) {
+        cin &gt;&gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &lt;&lt; &quot;Preorder traversal of the tree: &quot;;
+    c.pre_o(r);
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-Website_history_forward_and_backward_in_linked_list_cpp" style="display: none;">
+            <h3>Website history forward and backward in linked list.cpp</h3>
+            <pre><code>#include&lt;iostream&gt;
+using namespace std;
+
+class website {
+public:
+    website* next;
+    string WebName;
+    website* prev;
+
+    website() {
+        next = NULL;
+        WebName = &quot;&quot;;
+        prev = NULL;
+    }
+};
+
+class browser {
+private:
+    website* head;
+    website* recent;
+
+public:
+    browser() {
+        head = NULL;
+        recent = NULL;
+    }
+
+    void search() {
+        website* domain = new website();
+        cout &lt;&lt; &quot;\nEnter Website you want to search: &quot;;
+        cin &gt;&gt; domain-&gt;WebName;
+        cout &lt;&lt; &quot;\n&quot; &lt;&lt; domain-&gt;WebName &lt;&lt; &quot; is essential for nowadays. \n&quot;;
+
+        if (head == NULL) {
+            domain-&gt;next = NULL;
+            domain-&gt;prev = NULL;
+            head = domain;
+            recent = domain;
+            return;
+        }
+
+        website* temp = head;
+        while (temp-&gt;next) {
+            temp = temp-&gt;next;
+        }
+        domain-&gt;prev = temp;
+        temp-&gt;next = domain;
+        recent = domain;
+    }
+
+    void history() {
+        if (recent == NULL) {
+            cout &lt;&lt; &quot;\nNo history available.\n&quot;;
+            return;
+        }
+        website* temp = recent;
+        cout &lt;&lt; &quot;\nBrowsing History:\n&quot;;
+        while (temp != NULL) {
+            cout &lt;&lt; temp-&gt;WebName &lt;&lt; &quot;\n&quot;;
+            temp = temp-&gt;prev;
+        }
+    }
+
+    void forward() {
+        if (recent == NULL || recent-&gt;next == NULL) {
+            cout &lt;&lt; &quot;\nThere is no Next Tab\n&quot;;
+            return;
+        }
+        recent = recent-&gt;next;
+        cout &lt;&lt; &quot;\nThe Next Tab: &quot; &lt;&lt; recent-&gt;WebName &lt;&lt; endl;
+    }
+
+    void previous() {
+        if (recent == NULL || recent-&gt;prev == NULL) {
+            cout &lt;&lt; &quot;\nThere is no Previous Tab\n&quot;;
+            return;
+        }
+        recent = recent-&gt;prev;
+        cout &lt;&lt; &quot;\nThe Previous Tab: &quot; &lt;&lt; recent-&gt;WebName &lt;&lt; endl;
+    }
+
+    void deletehistory() {
+        if (head == NULL) {
+            cout &lt;&lt; &quot;\nHistory is empty.\n&quot;;
+            return;
+        }
+
+        int pos;
+        cout &lt;&lt; &quot;Enter the position to delete (1-based index): &quot;;
+        cin &gt;&gt; pos;
+
+        website* temp = head;
+        int count = 1;
+
+        while (temp != NULL &amp;&amp; count &lt; pos) {
+            temp = temp-&gt;next;
+            count++;
+        }
+
+        if (temp == NULL) {
+            cout &lt;&lt; &quot;\nInvalid position.\n&quot;;
+            return;
+        }
+
+        if (temp == recent) {
+            if (temp-&gt;prev)
+                recent = temp-&gt;prev;
+            else if (temp-&gt;next)
+                recent = temp-&gt;next;
+            else
+                recent = NULL;
+        }
+
+        if (temp == head) {
+            head = temp-&gt;next;
+            if (head)
+                head-&gt;prev = NULL;
+        } else {
+            temp-&gt;prev-&gt;next = temp-&gt;next;
+        }
+
+        if (temp-&gt;next)
+            temp-&gt;next-&gt;prev = temp-&gt;prev;
+
+        cout &lt;&lt; &quot;\nDeleted: &quot; &lt;&lt; temp-&gt;WebName &lt;&lt; endl;
+        delete temp;
+    }
+};
+
+int main() {
+    browser google;
+    int n = 0;
+
+    do {
+        cout &lt;&lt; &quot;\n-----MENU-----\n&quot;;
+        cout &lt;&lt; &quot;1. Browse a Website\n&quot;;
+        cout &lt;&lt; &quot;2. Show History\n&quot;;
+        cout &lt;&lt; &quot;3. Forward Tab\n&quot;;
+        cout &lt;&lt; &quot;4. Previous Tab\n&quot;;
+        cout &lt;&lt; &quot;5. Delete History at Position\n&quot;;
+        cout &lt;&lt; &quot;6. Exit\n&quot;;
+        cout &lt;&lt; &quot;Choose Option: &quot;;
+        cin &gt;&gt; n;
+
+        switch (n) {
+            case 1:
+                google.search();
+                break;
+            case 2:
+                google.history();
+                break;
+            case 3:
+                google.forward();
+                break;
+            case 4:
+                google.previous();
+                break;
+            case 5:
+                google.deletehistory();
+                break;
+            case 6:
+                cout &lt;&lt; &quot;\nExiting browser...\n&quot;;
+                break;
+            default:
+                cout &lt;&lt; &quot;\nInvalid Choice!\n&quot;;
+                break;
+        }
+
+    } while (n != 6);
+
+    return 0;
+}
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-generate_html_py" style="display: none;">
+            <h3>generate_html.py</h3>
+            <pre><code>import os
+import html
+import argparse # For command-line arguments
+
+# --- Configuration (Defaults, can be overridden by CLI args) ---
+DEFAULT_REPO_NAME = &quot;Repository Showcase&quot;
+DEFAULT_REPO_DESCRIPTION = &quot;Code and files from a Git repository.&quot;
+DEFAULT_REPO_URL = &quot;#&quot; # Placeholder, should be provided
+DEFAULT_LOCAL_REPO_PATH = &quot;.&quot; # Default source of files
+DEFAULT_INDEX_TEMPLATE_PATH = &quot;index.html&quot; # This is now our new template
+DEFAULT_OUTPUT_HTML_PATH = &quot;index.html&quot; # Output directly to index.html
+
+# --- Helper Functions ---
+
+def get_repository_files(repo_path):
+    &quot;&quot;&quot;
+    Lists files and directories in the repository.
+    Ignores .git directory and other common unnecessary files/dirs.
+    Returns a list of relative paths.
+    &quot;&quot;&quot;
+    items = []
+    # More robust ignore list, especially for when scanning subdirectories like &#x27;cloned_repo&#x27;
+    # These script names are less relevant to ignore when scanning a *different* directory.
+    base_ignore_list = [&#x27;.git&#x27;, &#x27;.idea&#x27;, &#x27;__pycache__&#x27;]
+    # Add more if needed, e.g. specific large files, build artifacts if not in .gitignore of target repo
+
+    for root, dirs, files in os.walk(repo_path, topdown=True):
+        # Modify dirs in-place to skip ignored directories
+        dirs[:] = [d for d in dirs if d not in base_ignore_list and not d.startswith(&#x27;.&#x27;)]
+
+        for name in files:
+            if name not in base_ignore_list and not name.startswith(&#x27;.&#x27;):
+                full_path = os.path.join(root, name)
+                relative_path = os.path.relpath(full_path, repo_path)
+                items.append(relative_path)
+
+        for name in dirs: # Also list directories
+            full_path = os.path.join(root, name)
+            relative_path = os.path.relpath(full_path, repo_path) + os.sep
+            items.append(relative_path)
+
+    items.sort()
+    return items
+
+def read_file_content(filepath, repo_scan_path):
+    &quot;&quot;&quot;Reads the content of a specific file, ensuring it&#x27;s within the scanned repo path.&quot;&quot;&quot;
+    # This check is a basic security measure if paths could be manipulated.
+    # For this script, file_path is generated by get_repository_files, so it&#x27;s already relative to repo_scan_path.
+    # However, constructing full_path safely is good.
+    absolute_repo_scan_path = os.path.abspath(repo_scan_path)
+    full_target_path = os.path.abspath(os.path.join(repo_scan_path, filepath))
+
+    if not full_target_path.startswith(absolute_repo_scan_path):
+        print(f&quot;Security warning: Attempt to read file outside of repository path: {filepath}&quot;)
+        return &quot;Error: Access denied.&quot;
+
+    try:
+        with open(full_target_path, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;, errors=&#x27;ignore&#x27;) as f:
+            return f.read()
+    except Exception as e:
+        print(f&quot;Error reading file {full_target_path}: {e}&quot;)
+        return f&quot;Error reading file: {e}&quot;
+
+def generate_file_list_html(files): # repo_path no longer needed here, path is for display
+    &quot;&quot;&quot;Generates HTML list items for the files.&quot;&quot;&quot;
+    if not files:
+        return &quot;&lt;li&gt;No files found in the repository.&lt;/li&gt;&quot;
+
+    list_items_html = []
+    for file_path in files:
+        # Ensure section_id matches what&#x27;s used in generate_file_content_sections_html
+        # The &#x27;file-&#x27; prefix is added to ensure valid ID and avoid conflicts if a file is named e.g. &#x27;1&#x27;
+        section_id = &quot;file-&quot; + html.escape(file_path.replace(os.sep, &quot;-&quot;).replace(&quot;.&quot;, &quot;_&quot;).replace(&quot; &quot;, &quot;_&quot;).replace(&quot;+&quot;, &quot;_plus_&quot;).replace(&quot;#&quot;, &quot;_hash_&quot;))
+
+        # Add a class if it&#x27;s a directory for specific styling
+        is_dir = file_path.endswith(os.sep)
+        link_class = &#x27; class=&quot;dir-link&quot;&#x27; if is_dir else &#x27;&#x27;
+
+        # For directories, the link might not point to a content section, or could point to a generated listing for that dir (future enhancement)
+        # For now, directories won&#x27;t have a clickable href that shows content, but will be listed.
+        # The JS in the template expects href to start with # to trigger content display.
+        # We make directory links non-functional for content display for now, or they could link to &#x27;#&#x27;
+        href_attr = f&#x27;href=&quot;#{section_id}&quot;&#x27; if not is_dir else &#x27;href=&quot;#&quot; onclick=&quot;event.preventDefault(); return false;&quot;&#x27; # Make dir links non-interactive for content display
+
+        list_items_html.append(
+            f&#x27;&lt;li&gt;&lt;a {href_attr} data-filepath=&quot;{html.escape(file_path)}&quot;{link_class}&gt;{html.escape(file_path)}&lt;/a&gt;&lt;/li&gt;&#x27;
+        )
+    return &quot;\n&quot;.join(list_items_html)
+
+def generate_file_content_sections_html(files, repo_scan_path):
+    &quot;&quot;&quot;Generates HTML sections for each file&#x27;s content, fitting the new template.&quot;&quot;&quot;
+    content_sections_html = []
+    for file_path in files:
+        if file_path.endswith(os.sep): # Skip directories for content display
+            continue
+
+        content = read_file_content(file_path, repo_scan_path)
+        escaped_content = html.escape(content)
+
+        # Ensure section_id matches what&#x27;s used in generate_file_list_html and JS
+        # The &#x27;file-&#x27; prefix is added to ensure valid ID
+        section_id = &quot;file-&quot; + html.escape(file_path.replace(os.sep, &quot;-&quot;).replace(&quot;.&quot;, &quot;_&quot;).replace(&quot; &quot;, &quot;_&quot;).replace(&quot;+&quot;, &quot;_plus_&quot;).replace(&quot;#&quot;, &quot;_hash_&quot;))
+
+        content_sections_html.append(f&quot;&quot;&quot;
+        &lt;section class=&quot;file-content-display&quot; id=&quot;{section_id}&quot; style=&quot;display: none;&quot;&gt;
+            &lt;h3&gt;{html.escape(file_path)}&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;{escaped_content}&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;&quot;&quot;&quot;)
+    if not content_sections_html:
+        return &#x27;&lt;h2 class=&quot;welcome-message&quot;&gt;No viewable files found in the repository.&lt;/h2&gt;&#x27;
+    return &quot;\n&quot;.join(content_sections_html)
+
+def main():
+    parser = argparse.ArgumentParser(description=&quot;Generate an HTML page from a repository&#x27;s files.&quot;)
+    parser.add_argument(&quot;repo_path&quot;, nargs=&#x27;?&#x27;, default=DEFAULT_LOCAL_REPO_PATH,
+                        help=&quot;Path to the local repository directory to scan.&quot;)
+    parser.add_argument(&quot;output_html_path&quot;, nargs=&#x27;?&#x27;, default=DEFAULT_OUTPUT_HTML_PATH,
+                        help=&quot;Path to save the generated HTML file.&quot;)
+    parser.add_argument(&quot;repo_name&quot;, nargs=&#x27;?&#x27;, default=DEFAULT_REPO_NAME,
+                        help=&quot;Name of the repository.&quot;)
+    parser.add_argument(&quot;repo_description&quot;, nargs=&#x27;?&#x27;, default=DEFAULT_REPO_DESCRIPTION,
+                        help=&quot;Description of the repository.&quot;)
+    parser.add_argument(&quot;repo_url&quot;, nargs=&#x27;?&#x27;, default=DEFAULT_REPO_URL,
+                        help=&quot;URL of the repository.&quot;)
+    parser.add_argument(&quot;--template&quot;, default=DEFAULT_INDEX_TEMPLATE_PATH,
+                        help=&quot;Path to the HTML template file.&quot;)
+
+    args = parser.parse_args()
+
+    print(f&quot;Reading HTML template from: {args.template}&quot;)
+    try:
+        with open(args.template, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+            template_content = f.read()
+    except FileNotFoundError:
+        print(f&quot;Error: Template file &#x27;{args.template}&#x27; not found.&quot;)
+        # Simplified error handling: if template is missing, just exit.
+        # The dummy creation logic was more for standalone testing.
+        return
+
+    print(f&quot;Scanning repository files in: {args.repo_path}&quot;)
+    if not os.path.isdir(args.repo_path):
+        print(f&quot;Error: Repository path &#x27;{args.repo_path}&#x27; not found or not a directory.&quot;)
+        return
+
+    repo_files = get_repository_files(args.repo_path)
+
+    print(f&quot;Found {len(repo_files)} files/directories.&quot;)
+
+    file_list_html = generate_file_list_html(repo_files) # repo_path was for constructing full paths, now handled in read_file_content
+    file_content_sections_html = generate_file_content_sections_html(repo_files, args.repo_path)
+
+    output_content = template_content.replace(&quot;{repo_name}&quot;, html.escape(args.repo_name))
+    output_content = output_content.replace(&quot;{repo_description}&quot;, html.escape(args.repo_description))
+    output_content = output_content.replace(&quot;{repo_link}&quot;, html.escape(args.repo_url))
+    output_content = output_content.replace(&quot;&lt;!-- File items will be dynamically inserted here by Python --&gt;&quot;, file_list_html)
+
+    # Replace the content of the file-content-wrapper div with the generated sections
+    # This is a more robust way than replacing a specific complex HTML block.
+    # We look for the specific div and replace its content.
+    # The placeholder comment inside is a good target.
+    placeholder_comment = &quot;&lt;!-- File content sections will be dynamically inserted here by Python --&gt;&quot;
+    wrapper_start_tag = &#x27;&lt;div class=&quot;file-content-wrapper&quot; id=&quot;file-content-wrapper&quot;&gt;&#x27;
+
+    # Find the position of the wrapper div&#x27;s content area
+    try:
+        start_index = output_content.index(wrapper_start_tag) + len(wrapper_start_tag)
+        # Find the end of this div. This is a bit naive; a proper parser would be better for complex HTML.
+        # For this template, it should work if the div is empty or contains only the placeholder comment.
+        end_index = output_content.index(&#x27;&lt;/div&gt;&#x27;, start_index)
+
+        # Construct the new content for the wrapper
+        # If file_content_sections_html is empty (e.g. no files), it will insert the welcome message from that function.
+        # Otherwise, it inserts the file sections. The client-side JS will manage showing the initial welcome message
+        # if no file is selected by hash.
+
+        # The original template has a welcome message. The Python script will now embed all content sections
+        # and the JS will decide if the welcome message (if present and not replaced) or a content section is shown.
+        # So we just inject file_content_sections_html into the wrapper.
+        # If file_content_sections_html itself contains a welcome message (e.g., &quot;No viewable files&quot;), that will be shown.
+        # Otherwise, the JS will show the template&#x27;s default welcome message if no file is auto-selected.
+
+        output_content = output_content[:start_index] + &quot;\n&quot; + file_content_sections_html + &quot;\n&quot; + output_content[end_index:]
+
+    except ValueError:
+        print(&quot;Error: Could not find the file-content-wrapper div or placeholder comment in the template.&quot;)
+        # Fallback or error handling if the specific div structure isn&#x27;t found.
+        # For now, we&#x27;ll try the old replacement method as a very basic fallback, though it&#x27;s unlikely to match.
+        old_placeholder_section = &quot;&quot;&quot;&lt;section class=&quot;file-content&quot; id=&quot;file-content-section&quot; style=&quot;display:none;&quot;&gt;
+            &lt;h3&gt;&lt;span id=&quot;current-file-path&quot;&gt;&lt;/span&gt;&lt;/h3&gt;
+            &lt;pre&gt;&lt;code id=&quot;code-display&quot;&gt;&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;&quot;&quot;&quot;
+        if old_placeholder_section in output_content:
+             output_content = output_content.replace(old_placeholder_section, file_content_sections_html)
+        else:
+            # If the new placeholder isn&#x27;t there and the old one isn&#x27;t either, there&#x27;s a template mismatch.
+            print(&quot;Critical Error: Template structure significantly changed. Cannot inject file content.&quot;)
+            return
+
+
+    # Check if the content to be written is different from the existing file
+    # to minimize unnecessary rewrites (as per original user request).
+    existing_content = &quot;&quot;
+    if os.path.exists(args.output_html_path):
+        try:
+            with open(args.output_html_path, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;) as f_old:
+                existing_content = f_old.read()
+        except IOError:
+            pass # Ignore if can&#x27;t read old file, just overwrite
+
+    if existing_content == output_content:
+        print(f&quot;Generated content is identical to &#x27;{args.output_html_path}&#x27;. No rewrite needed.&quot;)
+    else:
+        print(f&quot;Writing generated HTML to: {args.output_html_path}&quot;)
+        try:
+            with open(args.output_html_path, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+                f.write(output_content)
+            print(f&quot;Successfully generated &#x27;{args.output_html_path}&#x27;.&quot;)
+        except IOError as e:
+            print(f&quot;Error writing output file: {e}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-generated_index_html" style="display: none;">
+            <h3>generated_index.html</h3>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;GitHub Repository Viewer&lt;/title&gt;
+    &lt;style&gt;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
             line-height: 1.6;
             margin: 0;
             padding: 0;
@@ -91,35 +1953,1116 @@
             font-size: 0.9em;
             color: #586069;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1><a href="{repo_link}" id="repo-name-link" target="_blank">{repo_name}</a></h1>
-            <p id="repo-description">{repo_description}</p>
-            <p><strong>GitHub Link:</strong> <a href="{repo_link}" id="repo-github-link" target="_blank">{repo_link}</a></p>
-        </header>
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;header&gt;
+            &lt;h1&gt;&lt;a href=&quot;https://github.com/M-Mikran-Sandhu&quot; id=&quot;repo-name-link&quot; target=&quot;_blank&quot;&gt;M-Mikran-Sandhu&amp;#x27;s Showcase&lt;/a&gt;&lt;/h1&gt;
+            &lt;p id=&quot;repo-description&quot;&gt;A collection of my projects and code experiments.&lt;/p&gt;
+            &lt;p&gt;&lt;strong&gt;GitHub Link:&lt;/strong&gt; &lt;a href=&quot;https://github.com/M-Mikran-Sandhu&quot; id=&quot;repo-github-link&quot; target=&quot;_blank&quot;&gt;https://github.com/M-Mikran-Sandhu&lt;/a&gt;&lt;/p&gt;
+        &lt;/header&gt;
 
-        <section class="file-list">
-            <h2>Repository Files</h2>
-            <ul id="file-list-ul">
-                <!-- File items will be dynamically inserted here by Python -->
-                <!-- Example: <li><a href="#" data-filepath="path/to/file.py">path/to/file.py</a></li> -->
-            </ul>
-        </section>
+        &lt;section class=&quot;file-list&quot;&gt;
+            &lt;h2&gt;Repository Files&lt;/h2&gt;
+            &lt;ul id=&quot;file-list-ul&quot;&gt;
+                &lt;li&gt;&lt;a href=&quot;#Age Priorities list_cpp&quot; data-filepath=&quot;Age Priorities list.cpp&quot;&gt;Age Priorities list.cpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#Assignment 2&quot; data-filepath=&quot;Assignment 2&quot;&gt;Assignment 2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#README_md&quot; data-filepath=&quot;README.md&quot;&gt;README.md&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#Simple Queue_cpp&quot; data-filepath=&quot;Simple Queue.cpp&quot;&gt;Simple Queue.cpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#Song Playlist_cpp&quot; data-filepath=&quot;Song Playlist.cpp&quot;&gt;Song Playlist.cpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#Tree_cpp&quot; data-filepath=&quot;Tree.cpp&quot;&gt;Tree.cpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#Website history forward and backward in linked list_cpp&quot; data-filepath=&quot;Website history forward and backward in linked list.cpp&quot;&gt;Website history forward and backward in linked list.cpp&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#linkedlist_py&quot; data-filepath=&quot;linkedlist.py&quot;&gt;linkedlist.py&lt;/a&gt;&lt;/li&gt;
+                &lt;!-- Example: &lt;li&gt;&lt;a href=&quot;#&quot; data-filepath=&quot;path/to/file.py&quot;&gt;path/to/file.py&lt;/a&gt;&lt;/li&gt; --&gt;
+            &lt;/ul&gt;
+        &lt;/section&gt;
 
-        <section class="file-content" id="file-content-section" style="display:none;">
-            <h3><span id="current-file-path"></span></h3>
-            <pre><code id="code-display"></code></pre>
-        </section>
 
-        <footer>
-            <p>Dynamically generated by a Python script. Updates periodically.</p>
-        </footer>
-    </div>
+        &lt;section class=&quot;file-content&quot; id=&quot;Age Priorities list_cpp&quot;&gt;
+            &lt;h3&gt;Age Priorities list.cpp&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+using namespace std;
 
-    <script>
+struct Queue {
+    string name;
+    int age;
+    char gender;
+};
+
+struct Node {
+    Queue data;
+    Node* next;
+};
+
+class linkedlist {
+private:
+    Node* head;
+
+public:
+    linkedlist() {
+        head = NULL;
+    }
+
+    void insertQueue() {
+        Node* point = new Node();
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Name: &amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.name;
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Age: &amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.age;
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Gender (M/F): &amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.gender;
+        point-&amp;gt;next = NULL;
+
+
+        if (head == NULL || point-&amp;gt;data.age &amp;gt; head-&amp;gt;data.age) {
+            point-&amp;gt;next = head;
+            head = point;
+        } else {
+            Node* temp = head;
+            while (temp-&amp;gt;next != NULL &amp;amp;&amp;amp; temp-&amp;gt;next-&amp;gt;data.age &amp;gt;= point-&amp;gt;data.age) {
+                temp = temp-&amp;gt;next;
+            }
+            point-&amp;gt;next = temp-&amp;gt;next;
+            temp-&amp;gt;next = point;
+        }
+    }
+
+    void serveQueue() {
+        if (head == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThe Queue is Empty!\n&amp;quot;;
+            return;
+        }
+
+        cout &amp;lt;&amp;lt; &amp;quot;Processing...... \n&amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.name &amp;lt;&amp;lt; &amp;quot; has been served\n&amp;quot;;
+        switch (head-&amp;gt;data.gender) {
+            case &amp;#x27;M&amp;#x27;: case &amp;#x27;m&amp;#x27;:
+                cout &amp;lt;&amp;lt; &amp;quot;Because he is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                break;
+            case &amp;#x27;F&amp;#x27;: case &amp;#x27;f&amp;#x27;:
+                cout &amp;lt;&amp;lt; &amp;quot;Because she is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                break;
+            default:
+                cout &amp;lt;&amp;lt; &amp;quot;Because (he/she) is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                break;
+        }
+
+        Node* temp = head;
+        head = head-&amp;gt;next;
+        delete temp;
+    }
+
+    void displayQueue() {
+        if (head == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThe Queue is Empty!\n&amp;quot;;
+            return;
+        }
+
+        Node* temp = head;
+        int i = 1;
+        while (temp) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nPerson &amp;quot; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; &amp;quot;:\n&amp;quot;;
+            cout &amp;lt;&amp;lt; &amp;quot;Name: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.name &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+            cout &amp;lt;&amp;lt; &amp;quot;Age: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+            cout &amp;lt;&amp;lt; &amp;quot;Gender: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.gender &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+            temp = temp-&amp;gt;next;
+            i++;
+        }
+    }
+};
+
+int main() {
+    linkedlist hospital;
+    int n;
+    menu:
+    cout &amp;lt;&amp;lt; &amp;quot;\n1. Enter a person in the Queue.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n2. Serve a person.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n3. Show the list.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n4. Exit\n&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;Enter choice: &amp;quot;;
+    cin &amp;gt;&amp;gt; n;
+
+    switch (n) {
+        case 1:
+            hospital.insertQueue();
+            goto menu;
+        case 2:
+            hospital.serveQueue();
+            goto menu;
+        case 3:
+            hospital.displayQueue();
+            goto menu;
+        case 4:
+            return 0;
+        default:
+            cout &amp;lt;&amp;lt; &amp;quot;\nInvalid choice! Try again.\n&amp;quot;;
+            goto menu;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;Assignment 2&quot;&gt;
+            &lt;h3&gt;Assignment 2&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;string&amp;gt;
+
+using namespace std;
+
+struct transation {
+    int transaction_ID = 1;
+    string type;
+    int purchase;
+    transation* next;
+    transation* prv;
+};
+
+struct accounts {
+    int acc_id = 1;
+    string user_name;
+    accounts* next;
+    transation* head;
+    accounts* prv;
+};
+
+class tran {
+public:
+    void insertinlink(transation*&amp;amp; head) {
+        char ck;
+        do {
+            int purchase;
+            string tp;
+
+            cout &amp;lt;&amp;lt; &amp;quot;\nEnter Purchase: &amp;quot;;
+            cin &amp;gt;&amp;gt; purchase;
+            cin.ignore();
+
+            cout &amp;lt;&amp;lt; &amp;quot;\nEnter Note: &amp;quot;;
+            getline(cin, tp);
+
+            transation* node = new transation();
+            node-&amp;gt;purchase = purchase;
+            node-&amp;gt;type = tp;
+
+            if (head) {
+                transation* temp = head;
+                while (temp-&amp;gt;next) {
+                    temp = temp-&amp;gt;next;
+                }
+                node-&amp;gt;transaction_ID = temp-&amp;gt;transaction_ID + 1;
+                temp-&amp;gt;next = node;
+                node-&amp;gt;prv = temp;
+            } else {
+                head = node;
+            }
+
+            node-&amp;gt;next = NULL;
+
+            cout &amp;lt;&amp;lt; &amp;quot;\nPress &amp;#x27;Y&amp;#x27; to enter another transaction: &amp;quot;;
+            cin &amp;gt;&amp;gt; ck;
+        } while (ck == &amp;#x27;Y&amp;#x27; || ck == &amp;#x27;y&amp;#x27;);
+    }
+
+    void searchtran(transation* head) {
+        transation* temp = head;
+        while (temp) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nTransaction ID: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;transaction_ID &amp;lt;&amp;lt; endl;
+            cout &amp;lt;&amp;lt; &amp;quot;Purchase: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;purchase &amp;lt;&amp;lt; endl;
+            cout &amp;lt;&amp;lt; &amp;quot;Note: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;type &amp;lt;&amp;lt; endl;
+            temp = temp-&amp;gt;next;
+        }
+    }
+
+    void totaltransations(transation* head) {
+        transation* temp = head;
+        int sum = 0;
+        while (temp) {
+            sum += temp-&amp;gt;purchase;
+            temp = temp-&amp;gt;next;
+        }
+        cout &amp;lt;&amp;lt; &amp;quot;\nThe Total amount you have spent is: &amp;quot; &amp;lt;&amp;lt; sum &amp;lt;&amp;lt; &amp;quot; Rs\n&amp;quot;;
+    }
+
+    void display(transation* head) {
+        transation* temp = head;
+        while (temp) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nTransaction ID: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;transaction_ID &amp;lt;&amp;lt; endl;
+            cout &amp;lt;&amp;lt; &amp;quot;Purchase: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;purchase &amp;lt;&amp;lt; endl;
+            cout &amp;lt;&amp;lt; &amp;quot;Note: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;type &amp;lt;&amp;lt; endl;
+            temp = temp-&amp;gt;next;
+        }
+    }
+};
+
+class record {
+    accounts* acc_head;
+    int count = 0;
+
+public:
+    record() {
+        acc_head = NULL;
+    }
+
+    void newaccount() {
+        string name;
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Name: &amp;quot;;
+        cin.ignore();
+        getline(cin, name);
+
+        accounts* acc = new accounts();
+        count++;
+
+        if (acc_head) {
+            accounts* temp = acc_head;
+            while (temp-&amp;gt;next) {
+                temp = temp-&amp;gt;next;
+            }
+            acc-&amp;gt;acc_id = temp-&amp;gt;acc_id + 1;
+            temp-&amp;gt;next = acc;
+            acc-&amp;gt;prv = temp;
+        } else {
+            acc_head = acc;
+            acc-&amp;gt;prv = NULL;
+        }
+
+        cout &amp;lt;&amp;lt; &amp;quot;\nYour Account ID is: &amp;quot; &amp;lt;&amp;lt; acc-&amp;gt;acc_id &amp;lt;&amp;lt; endl;
+        acc-&amp;gt;user_name = name;
+        acc-&amp;gt;next = NULL;
+        acc-&amp;gt;head = NULL;
+
+        tran chain;
+        chain.insertinlink(acc-&amp;gt;head);
+    }
+
+    void searchaccount() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &amp;gt; 0) {
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Name: &amp;quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Account ID: &amp;quot;;
+            cin &amp;gt;&amp;gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&amp;gt;user_name &amp;amp;&amp;amp; acid == temp-&amp;gt;acc_id) {
+                    cout &amp;lt;&amp;lt; &amp;quot;\n \t Transaction records\n\n&amp;quot;;
+                    tran temp1;
+                    temp1.searchtran(temp-&amp;gt;head);
+                    return;
+                }
+                temp = temp-&amp;gt;next;
+            }
+
+            attempts--;
+            if (attempts &amp;gt; 0) {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Invalid ID or Name! Attempts left: &amp;quot; &amp;lt;&amp;lt; attempts &amp;lt;&amp;lt; endl;
+            } else {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Access limit reached! Returning to menu...&amp;quot; &amp;lt;&amp;lt; endl;
+            }
+        }
+    }
+
+    void addtoaccount() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &amp;gt; 0) {
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Name: &amp;quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Account ID: &amp;quot;;
+            cin &amp;gt;&amp;gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&amp;gt;user_name &amp;amp;&amp;amp; acid == temp-&amp;gt;acc_id) {
+                    tran temp1;
+                    temp1.insertinlink(temp-&amp;gt;head);
+                    return;
+                }
+                temp = temp-&amp;gt;next;
+            }
+
+            attempts--;
+            if (attempts &amp;gt; 0) {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Invalid ID or Name! Attempts left: &amp;quot; &amp;lt;&amp;lt; attempts &amp;lt;&amp;lt; endl;
+            } else {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Access limit reached! Returning to menu...&amp;quot; &amp;lt;&amp;lt; endl;
+            }
+        }
+    }
+
+    int totalacc() {
+        return count;
+    }
+
+    void totalexpense() {
+        int acid, attempts = 3;
+        string pn;
+
+        while (attempts &amp;gt; 0) {
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Name: &amp;quot;;
+            cin.ignore();
+            getline(cin, pn);
+            cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Enter Account ID: &amp;quot;;
+            cin &amp;gt;&amp;gt; acid;
+
+            accounts* temp = acc_head;
+            while (temp) {
+                if (pn == temp-&amp;gt;user_name &amp;amp;&amp;amp; acid == temp-&amp;gt;acc_id) {
+                    tran temp1;
+                    temp1.totaltransations(temp-&amp;gt;head);
+                    return;
+                }
+                temp = temp-&amp;gt;next;
+            }
+
+            attempts--;
+            if (attempts &amp;gt; 0) {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Invalid ID or Name! Attempts left: &amp;quot; &amp;lt;&amp;lt; attempts &amp;lt;&amp;lt; endl;
+            } else {
+                cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;Access limit reached! Returning to menu...&amp;quot; &amp;lt;&amp;lt; endl;
+            }
+        }
+    }
+
+    void display() {
+        accounts* temp = acc_head;
+        while (temp) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nName: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;user_name &amp;lt;&amp;lt; endl;
+            cout &amp;lt;&amp;lt; &amp;quot;Account ID: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;acc_id &amp;lt;&amp;lt; endl;
+            char ans;
+            cout &amp;lt;&amp;lt; &amp;quot;\nPress &amp;#x27;Y&amp;#x27; if you want transaction details: &amp;quot;;
+            cin &amp;gt;&amp;gt; ans;
+            if (ans == &amp;#x27;y&amp;#x27; || ans == &amp;#x27;Y&amp;#x27;) {
+                tran temp1;
+                temp1.display(temp-&amp;gt;head);
+            }
+            temp = temp-&amp;gt;next;
+        }
+    }
+};
+
+int main() {
+    int a, pass = 1234, p;
+    record m;
+
+    while (true) {
+        cout &amp;lt;&amp;lt; &amp;quot;\t\tMenu\n&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;1. New Account.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;2. Search Account.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;3. Add Transaction to Existing Account.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;4. Display Number of Accounts.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;5. Total Transactions of an Account.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;6. Display All Accounts.&amp;quot;;
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;7. Exit.&amp;quot;;
+
+        cout &amp;lt;&amp;lt; endl &amp;lt;&amp;lt; &amp;quot;\nEnter choice: &amp;quot;;
+        cin &amp;gt;&amp;gt; a;
+
+        switch (a) {
+            case 1:
+				m.newaccount();
+				break;
+            case 2:
+				m.searchaccount();
+				break;
+            case 3:
+				m.addtoaccount();
+				break;
+            case 4:
+				cout &amp;lt;&amp;lt; &amp;quot;\nTotal accounts are: &amp;quot; &amp;lt;&amp;lt; m.totalacc() &amp;lt;&amp;lt; endl;
+				break;
+            case 5:
+				m.totalexpense();
+				break;
+            case 6:
+                cout &amp;lt;&amp;lt; &amp;quot;Enter Password: &amp;quot;;
+                cin &amp;gt;&amp;gt; p;
+                if (pass == p) m.display();
+                else cout &amp;lt;&amp;lt; &amp;quot;\nInvalid password!\n&amp;quot;;
+                break;
+            case 7:
+				return 0;
+            default: cout &amp;lt;&amp;lt; &amp;quot;\nInvalid choice! Try again.\n&amp;quot;;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;README_md&quot;&gt;
+            &lt;h3&gt;README.md&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;# DATA-Structure-ALG
+DATA STRUCTURE AND ALGORITHM
+A Data Structure Algorithm refers to a set of instructions or steps designed to manipulate, organize, and process data efficiently using specific data structures. Below is a concise overview of key concepts:
+
+1. Common Data Structures
+Arrays: Fixed-size, sequential collection of elements.
+Linked Lists: Nodes connected by pointers (e.g., singly, doubly linked lists).
+Stacks: Last-In-First-Out (LIFO) structure (e.g., undo operations).
+Queues: First-In-First-Out (FIFO) structure (e.g., task scheduling).
+Hash Tables: Key-value pairs for fast lookups.
+Trees: Hierarchical structures (e.g., binary trees, AVL trees).
+Graphs: Nodes (vertices) connected by edges (e.g., social networks).
+Heaps: Specialized trees for priority-based operations.
+2. Key Algorithms
+Sorting Algorithms:
+Bubble Sort, Merge Sort, Quick Sort, Insertion Sort.
+Searching Algorithms:
+Linear Search, Binary Search.
+Graph Algorithms:
+Dijkstra’s Algorithm (shortest path), Depth-First Search (DFS), Breadth-First Search (BFS).
+Dynamic Programming:
+Solves problems by breaking them into overlapping subproblems (e.g., Fibonacci, Knapsack).
+Divide and Conquer:
+Splits problems into smaller subproblems (e.g., Merge Sort, Quick Sort).
+Greedy Algorithms:
+Makes locally optimal choices (e.g., Kruskal’s, Prim’s).
+3. Applications
+Web Development: Hash tables for caching, trees for DOM traversal.
+Databases: B-trees for indexing.
+Networking: Graph algorithms for routing.
+AI/ML: Dynamic programming for optimization problems.
+
+Efficient use of data structures and algorithms ensures optimal performance in software development. Let me know if you&amp;#x27;d like a deeper dive into any specific topic!
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;Simple Queue_cpp&quot;&gt;
+            &lt;h3&gt;Simple Queue.cpp&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+using namespace std;
+
+struct Queue {
+    string name;
+    int age;
+    char gender;
+};
+
+struct Node {
+    Queue data;
+    Node* next;
+};
+
+class linkedlist {
+private:
+    Node* head;
+    int front = -1;
+    int rare = -1;
+
+public:
+    linkedlist() {
+        head = NULL;
+    }
+
+    void insertQueue() {
+        rare++;
+        Node* point = new Node();
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Name:&amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.name;
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Age:&amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.age;
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Gender (M/F):&amp;quot;;
+        cin &amp;gt;&amp;gt; point-&amp;gt;data.gender;
+
+        point-&amp;gt;next = NULL;
+
+        if (rare == 0) {
+            front = 0;
+        }
+
+        if (head == NULL) {
+            head = point;
+        } else {
+            Node* temp = head;
+            while (temp-&amp;gt;next) {
+                temp = temp-&amp;gt;next;
+            }
+            temp-&amp;gt;next = point;
+        }
+    }
+
+    void serveQueue() {
+        if (front &amp;gt;= 0) {
+            if (head == NULL) {
+                cout &amp;lt;&amp;lt; &amp;quot;\nThe Queue is Empty!\n&amp;quot;;
+                return;
+            }
+
+            cout &amp;lt;&amp;lt; &amp;quot;Processing...... &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.name &amp;lt;&amp;lt; &amp;quot; has been served\n&amp;quot;;
+
+            switch (head-&amp;gt;data.gender) {
+                case &amp;#x27;M&amp;#x27;: case &amp;#x27;m&amp;#x27;:
+                    cout &amp;lt;&amp;lt; &amp;quot;Because he is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                    break;
+                case &amp;#x27;F&amp;#x27;: case &amp;#x27;f&amp;#x27;:
+                    cout &amp;lt;&amp;lt; &amp;quot;Because she is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                    break;
+                default:
+                    cout &amp;lt;&amp;lt; &amp;quot;Because (he/she) is &amp;quot; &amp;lt;&amp;lt; head-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot; years old\n&amp;quot;;
+                    break;
+            }
+
+            Node* temp = head;
+            head = head-&amp;gt;next;
+            delete temp;
+
+            rare--;
+            if (rare &amp;lt; 0) front = -1;
+        } else {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThe Queue is Empty!\n&amp;quot;;
+        }
+    }
+
+    void displayQueue() {
+        if (front &amp;gt;= 0 &amp;amp;&amp;amp; head != NULL) {
+            Node* temp = head;
+            int i = 1;
+
+            while (temp) {
+                cout &amp;lt;&amp;lt; &amp;quot;\nPerson &amp;quot; &amp;lt;&amp;lt; i &amp;lt;&amp;lt; &amp;quot;:\n&amp;quot;;
+                cout &amp;lt;&amp;lt; &amp;quot;Name: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.name &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+                cout &amp;lt;&amp;lt; &amp;quot;Age: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.age &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+                cout &amp;lt;&amp;lt; &amp;quot;Gender: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;data.gender &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+                temp = temp-&amp;gt;next;
+                i++;
+            }
+        } else {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThe Queue is Empty!\n&amp;quot;;
+        }
+    }
+};
+
+int main() {
+    linkedlist hospital;
+    int n;
+    menu:
+    cout &amp;lt;&amp;lt; &amp;quot;\n1. Enter a person in the Queue.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n2. Serve a person.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n3. Show the list.&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;\n4. Exit\n&amp;quot;;
+    cout &amp;lt;&amp;lt; &amp;quot;Enter choice: &amp;quot;;
+    cin &amp;gt;&amp;gt; n;
+
+    switch (n) {
+        case 1:
+            hospital.insertQueue();
+            goto menu;
+        case 2:
+            hospital.serveQueue();
+            goto menu;
+        case 3:
+            hospital.displayQueue();
+            goto menu;
+        case 4:
+            return 0;
+        default:
+            cout &amp;lt;&amp;lt; &amp;quot;\nInvalid choice! Try again.\n&amp;quot;;
+            goto menu;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;Song Playlist_cpp&quot;&gt;
+            &lt;h3&gt;Song Playlist.cpp&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+using namespace std;
+
+class Song{
+	public:
+		string name;
+		string title;
+		Song* prev;
+		Song* next;
+
+		Song(){
+			name=&amp;quot;&amp;quot;;
+			title=&amp;quot;&amp;quot;;
+			prev=NULL;
+			next=NULL;
+		}
+};
+class playlist{
+	Song* head;
+	Song* current;
+	int count=0;
+	public:
+		playlist(){
+			head=NULL;
+			current=NULL;
+		}
+		void addsong(){
+			Song* newsong=new Song();
+
+			cout&amp;lt;&amp;lt;&amp;quot;Enter Song Name:&amp;quot;;
+			cin&amp;gt;&amp;gt;newsong-&amp;gt;name;
+			cout&amp;lt;&amp;lt;&amp;quot;Enter Song Title:&amp;quot;;
+			cin&amp;gt;&amp;gt;newsong-&amp;gt;title;
+			if(head==NULL){
+				head=newsong;
+				newsong-&amp;gt;next=NULL;
+				newsong-&amp;gt;prev=NULL;
+				current=newsong;
+				count++;
+				return;
+			}else{
+				Song* temp=head;
+				while(temp-&amp;gt;next){
+					temp=temp-&amp;gt;next;
+				}
+				newsong-&amp;gt;prev=temp;
+				temp-&amp;gt;next=newsong;
+			}
+			current=newsong;
+			count++;
+		}
+
+		void playcurrentsong(){
+			if(count&amp;lt;1){
+				cout&amp;lt;&amp;lt;&amp;quot;\n No Song is currently in the list.\n&amp;quot;;
+				return;
+			}
+			cout&amp;lt;&amp;lt;&amp;quot;\nPlaying Song...........\n&amp;quot;;
+			cout&amp;lt;&amp;lt;&amp;quot;Name: &amp;quot;&amp;lt;&amp;lt;current-&amp;gt;name&amp;lt;&amp;lt;endl;
+			cout&amp;lt;&amp;lt;&amp;quot;Title: &amp;quot;&amp;lt;&amp;lt;current-&amp;gt;title&amp;lt;&amp;lt;endl;
+
+		}
+		void nextsong(){
+			if(current-&amp;gt;next==NULL){
+				cout&amp;lt;&amp;lt;&amp;quot;\nThere is no Next Song\n&amp;quot;;
+				return;
+			}
+			cout&amp;lt;&amp;lt;&amp;quot;\nMoving to the next Song.\n&amp;quot;;
+			current=current-&amp;gt;next;
+
+		}
+		void prevsong(){
+			if(current-&amp;gt;prev==NULL){
+				cout&amp;lt;&amp;lt;&amp;quot;\nThere is no Previous Song\n&amp;quot;;
+				return;
+			}
+			cout&amp;lt;&amp;lt;&amp;quot;\nMoving to the previous Song.\n&amp;quot;;
+			current=current-&amp;gt;prev;
+		}
+};
+int main(){
+	playlist youtube;
+	int n;
+	menu:
+	cout&amp;lt;&amp;lt;&amp;quot;\n----Menu----\n&amp;quot;;
+	cout&amp;lt;&amp;lt;&amp;quot;\n1. Add a Song&amp;quot;;
+	cout&amp;lt;&amp;lt;&amp;quot;\n2. Play Current Song&amp;quot;;
+	cout&amp;lt;&amp;lt;&amp;quot;\n3. Previous Song&amp;quot;;
+	cout&amp;lt;&amp;lt;&amp;quot;\n4. Next Song&amp;quot;;
+	cout&amp;lt;&amp;lt;&amp;quot;\n5. Exit App&amp;quot;;
+
+	cout&amp;lt;&amp;lt;&amp;quot;\nEnter your choice:&amp;quot;;
+	cin&amp;gt;&amp;gt;n;
+
+	switch(n){
+		case 1:{
+			youtube.addsong();
+			goto menu;
+		}
+		case 2:{
+			youtube.playcurrentsong();
+			goto menu;
+		}
+		case 3:{
+			youtube.prevsong();
+			goto menu;
+		}
+		case 4:{
+			youtube.nextsong();
+			goto menu;
+		}
+		case 5:{
+			cout&amp;lt;&amp;lt;&amp;quot;\nThe Application is Closing..............\n&amp;quot;;
+			break;
+		}
+		default:{
+			cout&amp;lt;&amp;lt;&amp;quot;\n Invalid Enter! Chose form the menu.\n&amp;quot;;
+			goto menu;
+		}
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;Tree_cpp&quot;&gt;
+            &lt;h3&gt;Tree.cpp&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int d) {
+        this-&amp;gt;d = d;
+        left = right = NULL;
+    }
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL) {
+            return new node(v);
+        }
+        if (v &amp;lt; r-&amp;gt;d) {
+            r-&amp;gt;left = insert(r-&amp;gt;left, v);
+        } else if (v &amp;gt; r-&amp;gt;d) {
+            r-&amp;gt;right = insert(r-&amp;gt;right, v);
+        }
+        return r;
+    }
+
+    void pre_o(node* r) {
+        if (r == NULL) return;
+        cout &amp;lt;&amp;lt; r-&amp;gt;d &amp;lt;&amp;lt; &amp;quot; &amp;quot;;
+        pre_o(r-&amp;gt;left);
+        pre_o(r-&amp;gt;right);
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &amp;lt;&amp;lt; &amp;quot;How many values do you want to insert? &amp;quot;;
+    cin &amp;gt;&amp;gt; n;
+
+    cout &amp;lt;&amp;lt; &amp;quot;Enter &amp;quot; &amp;lt;&amp;lt; n &amp;lt;&amp;lt; &amp;quot; integer values:\n&amp;quot;;
+    for (int i = 0; i &amp;lt; n; ++i) {
+        cin &amp;gt;&amp;gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &amp;lt;&amp;lt; &amp;quot;Preorder traversal of the tree: &amp;quot;;
+    c.pre_o(r);
+    cout &amp;lt;&amp;lt; endl;
+
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;Website history forward and backward in linked list_cpp&quot;&gt;
+            &lt;h3&gt;Website history forward and backward in linked list.cpp&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;#include&amp;lt;iostream&amp;gt;
+using namespace std;
+
+class website {
+public:
+    website* next;
+    string WebName;
+    website* prev;
+
+    website() {
+        next = NULL;
+        WebName = &amp;quot;&amp;quot;;
+        prev = NULL;
+    }
+};
+
+class browser {
+private:
+    website* head;
+    website* recent;
+
+public:
+    browser() {
+        head = NULL;
+        recent = NULL;
+    }
+
+    void search() {
+        website* domain = new website();
+        cout &amp;lt;&amp;lt; &amp;quot;\nEnter Website you want to search: &amp;quot;;
+        cin &amp;gt;&amp;gt; domain-&amp;gt;WebName;
+        cout &amp;lt;&amp;lt; &amp;quot;\n&amp;quot; &amp;lt;&amp;lt; domain-&amp;gt;WebName &amp;lt;&amp;lt; &amp;quot; is essential for nowadays. \n&amp;quot;;
+
+        if (head == NULL) {
+            domain-&amp;gt;next = NULL;
+            domain-&amp;gt;prev = NULL;
+            head = domain;
+            recent = domain;
+            return;
+        }
+
+        website* temp = head;
+        while (temp-&amp;gt;next) {
+            temp = temp-&amp;gt;next;
+        }
+        domain-&amp;gt;prev = temp;
+        temp-&amp;gt;next = domain;
+        recent = domain;
+    }
+
+    void history() {
+        if (recent == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nNo history available.\n&amp;quot;;
+            return;
+        }
+        website* temp = recent;
+        cout &amp;lt;&amp;lt; &amp;quot;\nBrowsing History:\n&amp;quot;;
+        while (temp != NULL) {
+            cout &amp;lt;&amp;lt; temp-&amp;gt;WebName &amp;lt;&amp;lt; &amp;quot;\n&amp;quot;;
+            temp = temp-&amp;gt;prev;
+        }
+    }
+
+    void forward() {
+        if (recent == NULL || recent-&amp;gt;next == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThere is no Next Tab\n&amp;quot;;
+            return;
+        }
+        recent = recent-&amp;gt;next;
+        cout &amp;lt;&amp;lt; &amp;quot;\nThe Next Tab: &amp;quot; &amp;lt;&amp;lt; recent-&amp;gt;WebName &amp;lt;&amp;lt; endl;
+    }
+
+    void previous() {
+        if (recent == NULL || recent-&amp;gt;prev == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nThere is no Previous Tab\n&amp;quot;;
+            return;
+        }
+        recent = recent-&amp;gt;prev;
+        cout &amp;lt;&amp;lt; &amp;quot;\nThe Previous Tab: &amp;quot; &amp;lt;&amp;lt; recent-&amp;gt;WebName &amp;lt;&amp;lt; endl;
+    }
+
+    void deletehistory() {
+        if (head == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nHistory is empty.\n&amp;quot;;
+            return;
+        }
+
+        int pos;
+        cout &amp;lt;&amp;lt; &amp;quot;Enter the position to delete (1-based index): &amp;quot;;
+        cin &amp;gt;&amp;gt; pos;
+
+        website* temp = head;
+        int count = 1;
+
+        while (temp != NULL &amp;amp;&amp;amp; count &amp;lt; pos) {
+            temp = temp-&amp;gt;next;
+            count++;
+        }
+
+        if (temp == NULL) {
+            cout &amp;lt;&amp;lt; &amp;quot;\nInvalid position.\n&amp;quot;;
+            return;
+        }
+
+        if (temp == recent) {
+            if (temp-&amp;gt;prev)
+                recent = temp-&amp;gt;prev;
+            else if (temp-&amp;gt;next)
+                recent = temp-&amp;gt;next;
+            else
+                recent = NULL;
+        }
+
+        if (temp == head) {
+            head = temp-&amp;gt;next;
+            if (head)
+                head-&amp;gt;prev = NULL;
+        } else {
+            temp-&amp;gt;prev-&amp;gt;next = temp-&amp;gt;next;
+        }
+
+        if (temp-&amp;gt;next)
+            temp-&amp;gt;next-&amp;gt;prev = temp-&amp;gt;prev;
+
+        cout &amp;lt;&amp;lt; &amp;quot;\nDeleted: &amp;quot; &amp;lt;&amp;lt; temp-&amp;gt;WebName &amp;lt;&amp;lt; endl;
+        delete temp;
+    }
+};
+
+int main() {
+    browser google;
+    int n = 0;
+
+    do {
+        cout &amp;lt;&amp;lt; &amp;quot;\n-----MENU-----\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;1. Browse a Website\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;2. Show History\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;3. Forward Tab\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;4. Previous Tab\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;5. Delete History at Position\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;6. Exit\n&amp;quot;;
+        cout &amp;lt;&amp;lt; &amp;quot;Choose Option: &amp;quot;;
+        cin &amp;gt;&amp;gt; n;
+
+        switch (n) {
+            case 1:
+                google.search();
+                break;
+            case 2:
+                google.history();
+                break;
+            case 3:
+                google.forward();
+                break;
+            case 4:
+                google.previous();
+                break;
+            case 5:
+                google.deletehistory();
+                break;
+            case 6:
+                cout &amp;lt;&amp;lt; &amp;quot;\nExiting browser...\n&amp;quot;;
+                break;
+            default:
+                cout &amp;lt;&amp;lt; &amp;quot;\nInvalid Choice!\n&amp;quot;;
+                break;
+        }
+
+    } while (n != 6);
+
+    return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;section class=&quot;file-content&quot; id=&quot;linkedlist_py&quot;&gt;
+            &lt;h3&gt;linkedlist.py&lt;/h3&gt;
+            &lt;pre&gt;&lt;code&gt;class Node:
+    &amp;quot;&amp;quot;&amp;quot;
+    A class representing a node in a singly linked list.
+    &amp;quot;&amp;quot;&amp;quot;
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class SinglyLinkedList:
+    &amp;quot;&amp;quot;&amp;quot;
+    A class to manage a singly linked list.
+    &amp;quot;&amp;quot;&amp;quot;
+    def __init__(self):
+        self.head = None
+
+    def insert_at_end(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        curr = self.head
+        while curr.next:
+            curr = curr.next
+        curr.next = new_node
+
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def insert_after_value(self, target, data):
+        curr = self.head
+        while curr:
+            if curr.data == target:
+                new_node = Node(data)
+                new_node.next = curr.next
+                curr.next = new_node
+                return
+            curr = curr.next
+        raise ValueError(f&amp;quot;Value &amp;#x27;{target}&amp;#x27; not found.&amp;quot;)
+
+    def delete_value(self, target):
+        if not self.head:
+            raise ValueError(&amp;quot;List is empty.&amp;quot;)
+
+        if self.head.data == target:
+            self.head = self.head.next
+            return
+
+        curr = self.head
+        while curr.next:
+            if curr.next.data == target:
+                curr.next = curr.next.next
+                return
+            curr = curr.next
+
+        raise ValueError(f&amp;quot;Value &amp;#x27;{target}&amp;#x27; not found.&amp;quot;)
+
+    def traverse(self):
+        elements = []
+        curr = self.head
+        while curr:
+            elements.append(curr.data)
+            curr = curr.next
+        return elements
+
+    def __str__(self):
+        return &amp;quot; -&amp;gt; &amp;quot;.join(map(str, self.traverse())) + &amp;quot; -&amp;gt; None&amp;quot;
+
+
+# === Main program with user interaction ===
+def main():
+    ll = SinglyLinkedList()
+
+    while True:
+        print(&amp;quot;\n--- Singly Linked List Menu ---&amp;quot;)
+        print(&amp;quot;1. Insert at beginning&amp;quot;)
+        print(&amp;quot;2. Insert at end&amp;quot;)
+        print(&amp;quot;3. Insert after value&amp;quot;)
+        print(&amp;quot;4. Delete a value&amp;quot;)
+        print(&amp;quot;5. Display list&amp;quot;)
+        print(&amp;quot;6. Exit&amp;quot;)
+        choice = input(&amp;quot;Enter your choice (1-6): &amp;quot;)
+
+        try:
+            if choice == &amp;#x27;1&amp;#x27;:
+                val = input(&amp;quot;Enter value to insert at beginning: &amp;quot;)
+                ll.insert_at_beginning(val)
+            elif choice == &amp;#x27;2&amp;#x27;:
+                val = input(&amp;quot;Enter value to insert at end: &amp;quot;)
+                ll.insert_at_end(val)
+            elif choice == &amp;#x27;3&amp;#x27;:
+                target = input(&amp;quot;Enter the value after which to insert: &amp;quot;)
+                val = input(&amp;quot;Enter value to insert: &amp;quot;)
+                ll.insert_after_value(target, val)
+            elif choice == &amp;#x27;4&amp;#x27;:
+                val = input(&amp;quot;Enter value to delete: &amp;quot;)
+                ll.delete_value(val)
+            elif choice == &amp;#x27;5&amp;#x27;:
+                print(&amp;quot;Linked List:&amp;quot;)
+                print(ll)
+            elif choice == &amp;#x27;6&amp;#x27;:
+                print(&amp;quot;Exiting program.&amp;quot;)
+                break
+            else:
+                print(&amp;quot;Invalid choice. Please enter a number between 1 and 6.&amp;quot;)
+        except ValueError as ve:
+            print(f&amp;quot;Error: {ve}&amp;quot;)
+
+if __name__ == &amp;quot;__main__&amp;quot;:
+    main()
+1
+&lt;/code&gt;&lt;/pre&gt;
+        &lt;/section&gt;
+
+
+        &lt;footer&gt;
+            &lt;p&gt;Dynamically generated by a Python script. Updates periodically.&lt;/p&gt;
+        &lt;/footer&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
         // Basic JavaScript to handle file clicks and display content
         // This will be expanded or replaced by the Python generation logic for static display,
         // or enhanced if we want client-side fetching for a more dynamic feel without page reloads.
@@ -130,14 +3073,14 @@
         // Placeholder for future client-side interactions if needed.
         // For instance, if we decide to load file content on click via JS:
         /*
-        document.addEventListener('DOMContentLoaded', () => {
-            const fileLinks = document.querySelectorAll('#file-list-ul a');
-            const fileContentSection = document.getElementById('file-content-section');
-            const codeDisplay = document.getElementById('code-display');
-            const currentFilePathDisplay = document.getElementById('current-file-path');
+        document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
+            const fileLinks = document.querySelectorAll(&#x27;#file-list-ul a&#x27;);
+            const fileContentSection = document.getElementById(&#x27;file-content-section&#x27;);
+            const codeDisplay = document.getElementById(&#x27;code-display&#x27;);
+            const currentFilePathDisplay = document.getElementById(&#x27;current-file-path&#x27;);
 
-            fileLinks.forEach(link => {
-                link.addEventListener('click', async (event) => {
+            fileLinks.forEach(link =&gt; {
+                link.addEventListener(&#x27;click&#x27;, async (event) =&gt; {
                     event.preventDefault();
                     const filePath = link.dataset.filepath;
 
@@ -148,14 +3091,797 @@
                     // const content = await response.text();
 
                     // currentFilePathDisplay.textContent = filePath;
-                    // codeDisplay.textContent = "Loading content for " + filePath + "..."; // Replace with actual content
-                    // fileContentSection.style.display = 'block';
+                    // codeDisplay.textContent = &quot;Loading content for &quot; + filePath + &quot;...&quot;; // Replace with actual content
+                    // fileContentSection.style.display = &#x27;block&#x27;;
 
-                    alert("Displaying content for: " + filePath + "\\n(This is a placeholder; content display will be handled by Python generation)");
+                    alert(&quot;Displaying content for: &quot; + filePath + &quot;\\n(This is a placeholder; content display will be handled by Python generation)&quot;);
                 });
             });
         });
         */
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-index_html" style="display: none;">
+            <h3>index.html</h3>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;{repo_name} - Code Showcase&lt;/title&gt;
+    &lt;style&gt;
+        :root {
+            --primary-color: #2c3e50; /* Dark Slate Blue */
+            --secondary-color: #8e44ad; /* Royal Purple */
+            --accent-color: #f1c40f; /* Sunflower Yellow/Gold */
+            --background-color: #ecf0f1; /* Light Greyish Blue */
+            --text-color: #34495e; /* Wet Asphalt (Dark Grey) */
+            --light-text-color: #ffffff;
+            --border-color: #bdc3c7; /* Silver */
+            --code-bg-color: #282c34; /* Dark background for code */
+            --code-text-color: #abb2bf; /* Light grey for code text */
+        }
+
+        body {
+            font-family: &#x27;Segoe UI&#x27;, Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1600px; /* Allow wider content */
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.2em;
+            font-weight: 300;
+        }
+
+        header h1 a {
+            color: var(--light-text-color);
+            text-decoration: none;
+        }
+         header h1 a:hover {
+            color: var(--accent-color);
+        }
+
+        header p {
+            font-size: 1.1em;
+            margin-bottom: 0.5em;
+            color: var(--border-color); /* Lighter text for description */
+        }
+
+        header .repo-link-header {
+            font-size: 0.9em;
+        }
+
+        header .repo-link-header a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        header .repo-link-header a:hover {
+            text-decoration: underline;
+        }
+
+        .sidebar {
+            width: 25%;
+            min-width: 280px; /* Min width for file list */
+            background-color: #ffffff;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto; /* Scroll if file list is long */
+            box-shadow: 1px 0 3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar h2 {
+            font-size: 1.6em;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-weight: 500;
+        }
+
+        .file-list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .file-list li {
+            margin-bottom: 8px;
+        }
+
+        .file-list a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            padding: 8px 12px;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .file-list a:hover, .file-list a.active {
+            background-color: var(--secondary-color);
+            color: var(--light-text-color);
+        }
+
+        .file-list a.dir-link { /* Style for directory links */
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        .file-list a.dir-link:hover {
+             background-color: var(--primary-color);
+        }
+
+
+        .main-content {
+            flex-grow: 1;
+            padding: 25px 30px;
+            overflow-y: auto; /* Scroll for long content */
+        }
+
+        .main-content h2.welcome-message {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .file-content-wrapper {
+            /* This div will be replaced by Python script */
+        }
+
+        .file-content-display { /* Class for individual file content sections */
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            margin-bottom: 25px; /* Space between content blocks if multiple are shown */
+        }
+
+        .file-content-display h3 {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            padding: 12px 20px;
+            margin: 0;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+            font-size: 1.3em;
+            font-weight: 500;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .file-content-display pre {
+            background-color: var(--code-bg-color);
+            color: var(--code-text-color);
+            padding: 20px;
+            margin: 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
+            font-family: &#x27;SFMono-Regular&#x27;, Consolas, &#x27;Liberation Mono&#x27;, Menlo, Courier, monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: var(--border-color); /* Lighter text for footer */
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) { /* Medium devices (tablets, less than 992px) */
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 40vh; /* Limit height of sidebar on small screens */
+            }
+            .main-content {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 768px) { /* Small devices (landscape phones, less than 768px) */
+             header h1 {
+                font-size: 2em;
+            }
+            .sidebar h2 {
+                font-size: 1.4em;
+            }
+             .file-content-display h3 {
+                font-size: 1.15em;
+            }
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;h1&gt;&lt;a href=&quot;{repo_link}&quot; target=&quot;_blank&quot;&gt;{repo_name}&lt;/a&gt;&lt;/h1&gt;
+        &lt;p&gt;{repo_description}&lt;/p&gt;
+        &lt;p class=&quot;repo-link-header&quot;&gt;Repository Link: &lt;a href=&quot;{repo_link}&quot; target=&quot;_blank&quot;&gt;{repo_link}&lt;/a&gt;&lt;/p&gt;
+    &lt;/header&gt;
+
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;aside class=&quot;sidebar&quot;&gt;
+            &lt;h2&gt;File Explorer&lt;/h2&gt;
+            &lt;nav class=&quot;file-list&quot;&gt;
+                &lt;ul id=&quot;file-list-ul&quot;&gt;
+                    &lt;!-- File items will be dynamically inserted here by Python --&gt;
+                    &lt;!-- Example: &lt;li&gt;&lt;a href=&quot;#path/to/file.py&quot; data-filepath=&quot;path/to/file.py&quot;&gt;path/to/file.py&lt;/a&gt;&lt;/li&gt; --&gt;
+                &lt;/ul&gt;
+            &lt;/nav&gt;
+        &lt;/aside&gt;
+
+        &lt;main class=&quot;main-content&quot;&gt;
+            &lt;!-- This div will contain all file content sections generated by Python --&gt;
+            &lt;div class=&quot;file-content-wrapper&quot; id=&quot;file-content-wrapper&quot;&gt;
+                &lt;h2 class=&quot;welcome-message&quot;&gt;Select a file from the list to view its content.&lt;/h2&gt;
+                &lt;!-- File content sections will be dynamically inserted here by Python --&gt;
+                &lt;!-- Example structure for Python to generate:
+                &lt;section class=&quot;file-content-display&quot; id=&quot;file-some_file_py&quot;&gt;
+                    &lt;h3&gt;some_file.py&lt;/h3&gt;
+                    &lt;pre&gt;&lt;code&gt;print(&quot;Hello World&quot;)&lt;/code&gt;&lt;/pre&gt;
+                &lt;/section&gt;
+                --&gt;
+            &lt;/div&gt;
+        &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;footer&gt;
+        &lt;p&gt;Dynamically generated code showcase. Styled for a modern experience.&lt;/p&gt;
+    &lt;/footer&gt;
+
+    &lt;script&gt;
+        // Client-side script to handle showing/hiding content sections
+        document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
+            const fileLinks = document.querySelectorAll(&#x27;.file-list a&#x27;);
+            const contentSections = document.querySelectorAll(&#x27;.file-content-display&#x27;);
+            const welcomeMessage = document.querySelector(&#x27;.main-content .welcome-message&#x27;);
+            const wrapper = document.getElementById(&#x27;file-content-wrapper&#x27;);
+
+            // Initially hide all content sections if JS is enabled
+            // Python will generate them, but JS can manage visibility
+            contentSections.forEach(section =&gt; {
+                section.style.display = &#x27;none&#x27;;
+            });
+
+            if (contentSections.length &gt; 0 &amp;&amp; welcomeMessage) {
+                 // If there&#x27;s content, but nothing selected, show welcome.
+                 // If URL hash points to a file, it will be shown later.
+            } else if (contentSections.length === 0 &amp;&amp; welcomeMessage) {
+                welcomeMessage.textContent = &#x27;No file content to display. Repository might be empty or files are directories only.&#x27;;
+            }
+
+
+            fileLinks.forEach(link =&gt; {
+                link.addEventListener(&#x27;click&#x27;, function(event) {
+                    // Check if it&#x27;s a directory link (ends with / or has a specific class if we add one)
+                    // For now, assume all links point to displayable content sections or are handled by URL hash
+                    if (this.href.includes(&#x27;#&#x27;)) { // Only process links with hashes
+                        event.preventDefault();
+
+                        const targetId = this.getAttribute(&#x27;href&#x27;).substring(1); // Get ID from href (e.g., #file-main-py)
+
+                        // Hide all sections and remove active class from links
+                        contentSections.forEach(section =&gt; section.style.display = &#x27;none&#x27;);
+                        fileLinks.forEach(lnk =&gt; lnk.classList.remove(&#x27;active&#x27;));
+
+                        // Show the target section and set active class on link
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            if(welcomeMessage) welcomeMessage.style.display = &#x27;none&#x27;;
+                            targetSection.style.display = &#x27;block&#x27;;
+                            this.classList.add(&#x27;active&#x27;);
+                            window.location.hash = targetId; // Update URL hash
+                        } else {
+                            if(welcomeMessage) {
+                                welcomeMessage.textContent = &#x27;Content not found for &#x27; + targetId.replace(/file-/g, &#x27;&#x27;).replace(/_/g, &#x27;.&#x27;);
+                                welcomeMessage.style.display = &#x27;block&#x27;;
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Check URL hash on page load to show specific file
+            if (window.location.hash) {
+                const targetId = window.location.hash.substring(1);
+                const targetLink = document.querySelector(`.file-list a[href=&quot;#${targetId}&quot;]`);
+                if (targetLink) {
+                    targetLink.click(); // Simulate click to show content and set active state
+                } else if (document.getElementById(targetId)) { // If section exists but no link matched (e.g. manual hash)
+                     contentSections.forEach(section =&gt; section.style.display = &#x27;none&#x27;);
+                     document.getElementById(targetId).style.display = &#x27;block&#x27;;
+                     if(welcomeMessage) welcomeMessage.style.display = &#x27;none&#x27;;
+                }
+            } else if (contentSections.length &gt; 0 &amp;&amp; welcomeMessage) {
+                // If there&#x27;s content but no hash, ensure welcome message is shown
+                welcomeMessage.style.display = &#x27;block&#x27;;
+            }
+        });
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-linkedlist_py" style="display: none;">
+            <h3>linkedlist.py</h3>
+            <pre><code>class Node:
+    &quot;&quot;&quot;
+    A class representing a node in a singly linked list.
+    &quot;&quot;&quot;
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class SinglyLinkedList:
+    &quot;&quot;&quot;
+    A class to manage a singly linked list.
+    &quot;&quot;&quot;
+    def __init__(self):
+        self.head = None
+
+    def insert_at_end(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        curr = self.head
+        while curr.next:
+            curr = curr.next
+        curr.next = new_node
+
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def insert_after_value(self, target, data):
+        curr = self.head
+        while curr:
+            if curr.data == target:
+                new_node = Node(data)
+                new_node.next = curr.next
+                curr.next = new_node
+                return
+            curr = curr.next
+        raise ValueError(f&quot;Value &#x27;{target}&#x27; not found.&quot;)
+
+    def delete_value(self, target):
+        if not self.head:
+            raise ValueError(&quot;List is empty.&quot;)
+
+        if self.head.data == target:
+            self.head = self.head.next
+            return
+
+        curr = self.head
+        while curr.next:
+            if curr.next.data == target:
+                curr.next = curr.next.next
+                return
+            curr = curr.next
+
+        raise ValueError(f&quot;Value &#x27;{target}&#x27; not found.&quot;)
+
+    def traverse(self):
+        elements = []
+        curr = self.head
+        while curr:
+            elements.append(curr.data)
+            curr = curr.next
+        return elements
+
+    def __str__(self):
+        return &quot; -&gt; &quot;.join(map(str, self.traverse())) + &quot; -&gt; None&quot;
+
+
+# === Main program with user interaction ===
+def main():
+    ll = SinglyLinkedList()
+
+    while True:
+        print(&quot;\n--- Singly Linked List Menu ---&quot;)
+        print(&quot;1. Insert at beginning&quot;)
+        print(&quot;2. Insert at end&quot;)
+        print(&quot;3. Insert after value&quot;)
+        print(&quot;4. Delete a value&quot;)
+        print(&quot;5. Display list&quot;)
+        print(&quot;6. Exit&quot;)
+        choice = input(&quot;Enter your choice (1-6): &quot;)
+
+        try:
+            if choice == &#x27;1&#x27;:
+                val = input(&quot;Enter value to insert at beginning: &quot;)
+                ll.insert_at_beginning(val)
+            elif choice == &#x27;2&#x27;:
+                val = input(&quot;Enter value to insert at end: &quot;)
+                ll.insert_at_end(val)
+            elif choice == &#x27;3&#x27;:
+                target = input(&quot;Enter the value after which to insert: &quot;)
+                val = input(&quot;Enter value to insert: &quot;)
+                ll.insert_after_value(target, val)
+            elif choice == &#x27;4&#x27;:
+                val = input(&quot;Enter value to delete: &quot;)
+                ll.delete_value(val)
+            elif choice == &#x27;5&#x27;:
+                print(&quot;Linked List:&quot;)
+                print(ll)
+            elif choice == &#x27;6&#x27;:
+                print(&quot;Exiting program.&quot;)
+                break
+            else:
+                print(&quot;Invalid choice. Please enter a number between 1 and 6.&quot;)
+        except ValueError as ve:
+            print(f&quot;Error: {ve}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    main()
+1
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-update_checker_py" style="display: none;">
+            <h3>update_checker.py</h3>
+            <pre><code>import os
+import subprocess
+import shutil # For removing directory tree if clone fails initially
+
+# --- Configuration ---
+# IMPORTANT: Replace this with the actual repository URL you want to track
+# The user M-Mikran-Sandhu does not seem to have public repositories.
+# Using a placeholder for demonstration.
+GIT_REPO_URL = &quot;https://github.com/octocat/Spoon-Knife.git&quot;
+# Path to clone the repository into
+LOCAL_REPO_DIR = &quot;cloned_repo&quot;
+# Script to regenerate HTML
+HTML_GENERATOR_SCRIPT = &quot;generate_html.py&quot;
+
+def run_command(command, cwd=None):
+    &quot;&quot;&quot;Runs a shell command and returns its output and error code.&quot;&quot;&quot;
+    print(f&quot;Running command: {&#x27; &#x27;.join(command)} in {cwd or os.getcwd()}&quot;)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=cwd)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        print(f&quot;Error running command: {&#x27; &#x27;.join(command)}&quot;)
+        print(f&quot;STDOUT: {stdout}&quot;)
+        print(f&quot;STDERR: {stderr}&quot;)
+    return stdout, stderr, process.returncode
+
+def clone_repo():
+    &quot;&quot;&quot;Clones the repository if it doesn&#x27;t exist.&quot;&quot;&quot;
+    if os.path.exists(LOCAL_REPO_DIR):
+        print(f&quot;Repository already exists at {LOCAL_REPO_DIR}.&quot;)
+        return True
+
+    print(f&quot;Cloning repository {GIT_REPO_URL} into {LOCAL_REPO_DIR}...&quot;)
+    # Ensure parent directory exists if LOCAL_REPO_DIR includes subdirectories e.g. &quot;some_path/cloned_repo&quot;
+    # os.makedirs(os.path.dirname(LOCAL_REPO_DIR), exist_ok=True) # Not needed if LOCAL_REPO_DIR is simple
+
+    stdout, stderr, returncode = run_command([&quot;git&quot;, &quot;clone&quot;, GIT_REPO_URL, LOCAL_REPO_DIR])
+    if returncode == 0:
+        print(&quot;Repository cloned successfully.&quot;)
+        return True
+    else:
+        print(f&quot;Failed to clone repository. Error: {stderr}&quot;)
+        # Clean up potentially incomplete clone
+        if os.path.exists(LOCAL_REPO_DIR):
+            print(f&quot;Cleaning up incomplete clone at {LOCAL_REPO_DIR}&quot;)
+            try:
+                shutil.rmtree(LOCAL_REPO_DIR)
+            except OSError as e:
+                print(f&quot;Error removing directory {LOCAL_REPO_DIR}: {e}&quot;)
+        return False
+
+def pull_updates():
+    &quot;&quot;&quot;
+    Pulls updates for the repository.
+    Returns True if updates were fetched or no updates were needed, False on error.
+    Returns a second boolean: True if changes were pulled, False otherwise.
+    &quot;&quot;&quot;
+    if not os.path.exists(os.path.join(LOCAL_REPO_DIR, &quot;.git&quot;)):
+        print(f&quot;Not a git repository: {LOCAL_REPO_DIR}. Attempting to clone again.&quot;)
+        if not clone_repo():
+            return False, False # Main operation failed, no changes
+        # If clone was successful, it&#x27;s up to date, so no &quot;new&quot; changes from this pull.
+        return True, False
+
+    print(f&quot;Fetching updates for {LOCAL_REPO_DIR}...&quot;)
+
+    # Get current HEAD commit hash before fetching/pulling
+    stdout_hash_before, _, ret_hash_before = run_command([&quot;git&quot;, &quot;rev-parse&quot;, &quot;HEAD&quot;], cwd=LOCAL_REPO_DIR)
+    if ret_hash_before != 0:
+        print(&quot;Could not get current HEAD hash before pull.&quot;)
+        # Proceed with pull, change detection might be less reliable
+        current_hash_before = None
+    else:
+        current_hash_before = stdout_hash_before.strip()
+
+    # Fetch changes
+    _, _, ret_fetch = run_command([&quot;git&quot;, &quot;fetch&quot;], cwd=LOCAL_REPO_DIR)
+    if ret_fetch != 0:
+        print(&quot;Failed to fetch updates.&quot;)
+        return False, False
+
+    # Check for changes by comparing local HEAD with remote HEAD
+    # &#x27;git status -uno&#x27; can also be useful but rev-parse is more direct for commit changes
+    stdout_local_hash, _, _ = run_command([&quot;git&quot;, &quot;rev-parse&quot;, &quot;HEAD&quot;], cwd=LOCAL_REPO_DIR)
+    stdout_remote_hash, _, _ = run_command([&quot;git&quot;, &quot;rev-parse&quot;, &quot;origin/HEAD&quot;], cwd=LOCAL_REPO_DIR) # Assumes default remote &#x27;origin&#x27; and its default branch
+
+    if stdout_local_hash.strip() == stdout_remote_hash.strip():
+        print(&quot;Repository is already up-to-date.&quot;)
+        return True, False # Operation successful, no changes
+
+    print(&quot;Updates found. Pulling changes...&quot;)
+    stdout_pull, stderr_pull, ret_pull = run_command([&quot;git&quot;, &quot;pull&quot;], cwd=LOCAL_REPO_DIR)
+    if ret_pull != 0:
+        print(f&quot;Failed to pull updates. Error: {stderr_pull}&quot;)
+        # Handle potential merge conflicts here if necessary, though script assumes clean pulls.
+        return False, False
+
+    print(&quot;Updates pulled successfully.&quot;)
+
+    # Confirm HEAD changed after pull
+    stdout_hash_after, _, ret_hash_after = run_command([&quot;git&quot;, &quot;rev-parse&quot;, &quot;HEAD&quot;], cwd=LOCAL_REPO_DIR)
+    if ret_hash_after != 0:
+        print(&quot;Could not get current HEAD hash after pull.&quot;)
+        return True, True # Assume changes if pull seemed successful but hash check failed
+
+    new_hash_after = stdout_hash_after.strip()
+
+    if current_hash_before and new_hash_after != current_hash_before:
+        print(f&quot;Repository updated. New HEAD: {new_hash_after}&quot;)
+        return True, True # Operation successful, changes detected
+    elif not current_hash_before: # If we couldn&#x27;t get hash before, but pull succeeded
+        print(&quot;Repository updated (unable to compare hashes directly).&quot;)
+        return True, True # Assume changes
+    else:
+        # This case (pull succeeded but hash didn&#x27;t change) should be rare if fetch indicated changes
+        print(&quot;Pull completed, but no new commits detected (hash unchanged). This might happen with fast-forwards of branches not currently checked out.&quot;)
+        return True, False
+
+
+def trigger_html_regeneration():
+    &quot;&quot;&quot;Calls the HTML generator script.&quot;&quot;&quot;
+    print(f&quot;Triggering HTML regeneration using {HTML_GENERATOR_SCRIPT}...&quot;)
+    # This assumes generate_html.py knows where to find the cloned repo
+    # or we pass it as an argument.
+    # For now, we need to modify generate_html.py to accept LOCAL_REPO_DIR.
+
+    # Simplest way: modify generate_html.py to use an environment variable or a fixed path
+    # that update_checker.py also knows.
+    # Or, pass as command line argument.
+
+    # Let&#x27;s assume generate_html.py is modified to use LOCAL_REPO_DIR
+    # We can modify generate_html.py to take LOCAL_REPO_DIR as a parameter.
+    # For now, I&#x27;ll call it and it will use its own configured path.
+    # This will require an update to generate_html.py.
+
+    # We need to ensure generate_html.py operates on the files within LOCAL_REPO_DIR.
+    # And that its output (generated_index.html) is at the top level.
+
+    # Let&#x27;s pass the repo path and output path to generate_html.py
+    # python generate_html.py &lt;repo_source_path&gt; &lt;output_html_file&gt; &lt;repo_name_override&gt; &lt;repo_desc_override&gt; &lt;repo_url_override&gt;
+    # This makes generate_html.py more flexible.
+
+    repo_name_from_url = GIT_REPO_URL.split(&#x27;/&#x27;)[-1].replace(&#x27;.git&#x27;, &#x27;&#x27;)
+
+    command = [
+        &quot;python&quot;, HTML_GENERATOR_SCRIPT,
+        LOCAL_REPO_DIR, # input path for files
+        &quot;generated_index.html&quot;, # output html file name
+        repo_name_from_url, # repo name
+        f&quot;Content of {repo_name_from_url}&quot;, # repo description
+        GIT_REPO_URL # repo url
+    ]
+
+    stdout, stderr, returncode = run_command(command, cwd=os.getcwd()) # Run from script&#x27;s dir
+
+    if returncode == 0:
+        print(&quot;HTML regeneration script completed successfully.&quot;)
+    else:
+        print(f&quot;HTML regeneration script failed. Error: {stderr}&quot;)
+
+def main():
+    print(&quot;--- Starting Repository Update Check ---&quot;)
+    if not clone_repo(): # Clones if not exists
+        print(&quot;Exiting due to cloning issues.&quot;)
+        return
+
+    success, has_changes = pull_updates()
+    if not success:
+        print(&quot;Exiting due to issues pulling updates.&quot;)
+        return
+
+    if has_changes:
+        print(&quot;Repository has new changes. Regenerating HTML.&quot;)
+        trigger_html_regeneration()
+    else:
+        print(&quot;No new changes in repository. HTML regeneration not required.&quot;)
+
+    print(&quot;--- Repository Update Check Finished ---&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    # For now, just run once. Scheduling will be added later.
+    main()
+</code></pre>
+        </section>
+
+        <section class="file-content-display" id="file-write_a_cpp_program_that_prints_only_the_leaf_nodes_in_a_tree_cpp" style="display: none;">
+            <h3>write a cpp program that prints only the leaf nodes in a tree.cpp</h3>
+            <pre><code>//write a cpp program that prints only the leaf nodes in a tree
+#include&lt;iostream&gt;
+using namespace std;
+
+class node {
+public:
+    int d;
+    node *left, *right;
+    node(int val) : d(val), left(NULL), right(NULL) {}
+};
+
+class B {
+public:
+    node* insert(node* r, int v) {
+        if (r == NULL) {
+            return new node(v);
+        }
+        if (v &lt; r-&gt;d) {
+            r-&gt;left = insert(r-&gt;left, v);
+        } else if (v &gt; r-&gt;d) {
+            r-&gt;right = insert(r-&gt;right, v);
+        }
+        return r;
+    }
+
+    void printLeafNodes(node* r) {
+        if (r == NULL) return;
+
+        if (r-&gt;left == NULL &amp;&amp; r-&gt;right == NULL) {
+            cout &lt;&lt; r-&gt;d &lt;&lt; &quot; &quot;;
+            return;
+        }
+
+        printLeafNodes(r-&gt;left);
+        printLeafNodes(r-&gt;right);
+    }
+};
+
+int main() {
+    node *r = NULL;
+    B c;
+    int n, val;
+
+    cout &lt;&lt; &quot;How many values? &quot;;
+    cin &gt;&gt; n;
+
+    cout &lt;&lt; &quot;Enter values:\n&quot;;
+    for (int i = 0; i &lt; n; ++i) {
+        cin &gt;&gt; val;
+        r = c.insert(r, val);
+    }
+
+    cout &lt;&lt; &quot;Leaf nodes: &quot;;
+    c.printLeafNodes(r);
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+        </section>
+</div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Dynamically generated code showcase. Styled for a modern experience.</p>
+    </footer>
+
+    <script>
+        // Client-side script to handle showing/hiding content sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileLinks = document.querySelectorAll('.file-list a');
+            const contentSections = document.querySelectorAll('.file-content-display');
+            const welcomeMessage = document.querySelector('.main-content .welcome-message');
+            const wrapper = document.getElementById('file-content-wrapper');
+
+            // Initially hide all content sections if JS is enabled
+            // Python will generate them, but JS can manage visibility
+            contentSections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            if (contentSections.length > 0 && welcomeMessage) {
+                 // If there's content, but nothing selected, show welcome.
+                 // If URL hash points to a file, it will be shown later.
+            } else if (contentSections.length === 0 && welcomeMessage) {
+                welcomeMessage.textContent = 'No file content to display. Repository might be empty or files are directories only.';
+            }
+
+
+            fileLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    // Check if it's a directory link (ends with / or has a specific class if we add one)
+                    // For now, assume all links point to displayable content sections or are handled by URL hash
+                    if (this.href.includes('#')) { // Only process links with hashes
+                        event.preventDefault();
+
+                        const targetId = this.getAttribute('href').substring(1); // Get ID from href (e.g., #file-main-py)
+
+                        // Hide all sections and remove active class from links
+                        contentSections.forEach(section => section.style.display = 'none');
+                        fileLinks.forEach(lnk => lnk.classList.remove('active'));
+
+                        // Show the target section and set active class on link
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            if(welcomeMessage) welcomeMessage.style.display = 'none';
+                            targetSection.style.display = 'block';
+                            this.classList.add('active');
+                            window.location.hash = targetId; // Update URL hash
+                        } else {
+                            if(welcomeMessage) {
+                                welcomeMessage.textContent = 'Content not found for ' + targetId.replace(/file-/g, '').replace(/_/g, '.');
+                                welcomeMessage.style.display = 'block';
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Check URL hash on page load to show specific file
+            if (window.location.hash) {
+                const targetId = window.location.hash.substring(1);
+                const targetLink = document.querySelector(`.file-list a[href="#${targetId}"]`);
+                if (targetLink) {
+                    targetLink.click(); // Simulate click to show content and set active state
+                } else if (document.getElementById(targetId)) { // If section exists but no link matched (e.g. manual hash)
+                     contentSections.forEach(section => section.style.display = 'none');
+                     document.getElementById(targetId).style.display = 'block';
+                     if(welcomeMessage) welcomeMessage.style.display = 'none';
+                }
+            } else if (contentSections.length > 0 && welcomeMessage) {
+                // If there's content but no hash, ensure welcome message is shown
+                welcomeMessage.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
