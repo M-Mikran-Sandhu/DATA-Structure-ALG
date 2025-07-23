@@ -21,7 +21,7 @@ def get_repository_files(repo_path):
     items = []
     # More robust ignore list, especially for when scanning subdirectories like 'cloned_repo'
     # These script names are less relevant to ignore when scanning a *different* directory.
-    base_ignore_list = ['.git', '.idea', '__pycache__']
+    base_ignore_list = ['.git', '.idea', '__pycache__', 'generate_html.py', 'update_checker.py']
     # Add more if needed, e.g. specific large files, build artifacts if not in .gitignore of target repo
 
     for root, dirs, files in os.walk(repo_path, topdown=True):

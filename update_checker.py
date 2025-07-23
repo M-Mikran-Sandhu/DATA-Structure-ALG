@@ -6,9 +6,9 @@ import shutil # For removing directory tree if clone fails initially
 # IMPORTANT: Replace this with the actual repository URL you want to track
 # The user M-Mikran-Sandhu does not seem to have public repositories.
 # Using a placeholder for demonstration.
-GIT_REPO_URL = "https://github.com/octocat/Spoon-Knife.git"
+GIT_REPO_URL = "https://github.com/M-Mikran-Sandhu/DATA-Structure-ALG.git"
 # Path to clone the repository into
-LOCAL_REPO_DIR = "cloned_repo"
+LOCAL_REPO_DIR = "."
 # Script to regenerate HTML
 HTML_GENERATOR_SCRIPT = "generate_html.py"
 
@@ -24,28 +24,38 @@ def run_command(command, cwd=None):
     return stdout, stderr, process.returncode
 
 def clone_repo():
-    """Clones the repository if it doesn't exist."""
-    if os.path.exists(LOCAL_REPO_DIR):
+    """Clones the repository into the current directory."""
+    if os.path.exists(os.path.join(LOCAL_REPO_DIR, '.git')):
         print(f"Repository already exists at {LOCAL_REPO_DIR}.")
         return True
 
     print(f"Cloning repository {GIT_REPO_URL} into {LOCAL_REPO_DIR}...")
-    # Ensure parent directory exists if LOCAL_REPO_DIR includes subdirectories e.g. "some_path/cloned_repo"
-    # os.makedirs(os.path.dirname(LOCAL_REPO_DIR), exist_ok=True) # Not needed if LOCAL_REPO_DIR is simple
 
-    stdout, stderr, returncode = run_command(["git", "clone", GIT_REPO_URL, LOCAL_REPO_DIR])
+    # Create a temporary directory for cloning
+    temp_clone_dir = "temp_clone"
+    if os.path.exists(temp_clone_dir):
+        shutil.rmtree(temp_clone_dir)
+    os.makedirs(temp_clone_dir)
+
+    # Clone into the temporary directory
+    stdout, stderr, returncode = run_command(["git", "clone", GIT_REPO_URL, temp_clone_dir])
     if returncode == 0:
-        print("Repository cloned successfully.")
+        print("Repository cloned successfully to temporary directory.")
+        # Move contents to the root directory
+        for item in os.listdir(temp_clone_dir):
+            s = os.path.join(temp_clone_dir, item)
+            d = os.path.join(LOCAL_REPO_DIR, item)
+            if os.path.exists(d):
+                if os.path.isdir(d):
+                    shutil.rmtree(d)
+                else:
+                    os.remove(d)
+            shutil.move(s, d)
+        shutil.rmtree(temp_clone_dir)
         return True
     else:
         print(f"Failed to clone repository. Error: {stderr}")
-        # Clean up potentially incomplete clone
-        if os.path.exists(LOCAL_REPO_DIR):
-            print(f"Cleaning up incomplete clone at {LOCAL_REPO_DIR}")
-            try:
-                shutil.rmtree(LOCAL_REPO_DIR)
-            except OSError as e:
-                print(f"Error removing directory {LOCAL_REPO_DIR}: {e}")
+        shutil.rmtree(temp_clone_dir)
         return False
 
 def pull_updates():
@@ -168,11 +178,8 @@ def main():
         print("Exiting due to issues pulling updates.")
         return
 
-    if has_changes:
-        print("Repository has new changes. Regenerating HTML.")
-        trigger_html_regeneration()
-    else:
-        print("No new changes in repository. HTML regeneration not required.")
+    print("Regenerating HTML.")
+    trigger_html_regeneration()
 
     print("--- Repository Update Check Finished ---")
 
